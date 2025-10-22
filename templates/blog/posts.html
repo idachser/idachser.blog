@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block posts %}
+<div>
+    {% for post in posts %}
+    <h1>{{ post.title }}</h1>
+    <p>{{ post.publish_date }}</p>
+    <p>{{ post.author }}</p>
+    <p>{{ post.description }}</p>
+    <a href="{% url 'post_detail' post.slug %}">Read More</a>
+    {% endfor %}
+{% endblock %}
