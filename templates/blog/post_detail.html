@@ -4,6 +4,6 @@
 <h1>{{ post.title }}</h1>
 <p>{{ post.publish_date }}</p>
 <p>{{ post.author }}</p>
-<p>{{ post.body }}</p>
+<p class=".codehilite">{{ post.body|safe }}</p>
 <p>{{ post.tags }}</p>
 {% endblock post %}

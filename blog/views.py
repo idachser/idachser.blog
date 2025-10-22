@@ -1,3 +1,4 @@
+import markdown
 from django.shortcuts import get_list_or_404, get_object_or_404, render
 
 from .models import Post
@@ -9,5 +10,8 @@ def posts_list(request):
 
 
 def post_detail(request, slug):
+    md = markdown.Markdown(extensions=["fenced_code", "codehilite"])
     post = get_object_or_404(Post, slug=slug)
-    return render(request, "blog/post_detail.html", {"post": post})
+    post.body = md.convert(post.body)
+    context = {"post": post}
+    return render(request, "blog/post_detail.html", context)
