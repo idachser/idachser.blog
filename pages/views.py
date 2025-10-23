@@ -1,3 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
-# Create your views here.
+from .models import AboutMeInfo
+
+
+def about(request):
+    about_info = get_object_or_404(AboutMeInfo)
+    return render(request, "pages/about.html", {"info": about_info})

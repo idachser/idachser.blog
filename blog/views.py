@@ -1,7 +1,7 @@
 import markdown
 from django.shortcuts import get_list_or_404, get_object_or_404, render
 
-from .models import Post
+from .models import Post, Tag
 
 
 def posts_list(request):
@@ -15,3 +15,8 @@ def post_detail(request, slug):
     post.body = md.convert(post.body)
     context = {"post": post}
     return render(request, "blog/post_detail.html", context)
+
+
+def tags_list(request):
+    tags = Tag.objects.all()
+    return render(request, "blog/tags.html", {"tags": tags})
