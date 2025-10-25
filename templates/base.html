@@ -7,13 +7,19 @@
     <meta charset="UTF=8">
     <title>idachser</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
 </head>
 
 <body>
+    {% include "header.html" %}
+    <main>
     {% block posts %}{% endblock posts %}
     {% block post %}{% endblock post %}
     {% block tags %}{% endblock tags %}
     {% block about %}{% endblock about %}
+    </main>
 </body>
 
 </html>
