@@ -4,22 +4,27 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF=8">
-    <title>idachser</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <meta charset="UTF=8"/>
+    <title>{% block title %}idachser.blog{% endblock title %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/highlight.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 
 <body>
     {% include "header.html" %}
     <main>
+        <section class="title">
+            {% block page_title %}<h1>idachser.blog</h1>{% endblock page_title %}
+        </section>
     {% block posts %}{% endblock posts %}
     {% block post %}{% endblock post %}
     {% block tags %}{% endblock tags %}
     {% block about %}{% endblock about %}
     </main>
+    <footer>©{{ date_now|date:"Y" }}.idachser</footer>
 </body>
 
 </html>
