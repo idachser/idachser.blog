@@ -1,26 +1,30 @@
 {% load static %}
 {% block header %}
 <header>
-    <div class="nav">
-        <nav class="nav-btns">
-            <a class="nav-btn" href="/">home<img class="icon link" src="{% static "icons/arrow-up-right-from-square-solid-full.svg" %}">
-            </a>
-            <a class="nav-btn" href="/tags">tags<img class="icon link" src="{% static "icons/arrow-up-right-from-square-solid-full.svg" %}">
-            </a>
-            <a class="nav-btn" href="/about">about<img class="icon link" src="{% static "icons/arrow-up-right-from-square-solid-full.svg" %}">
-            </a>
-        </nav>
-        <div class="links">
-            <a class="nav-btn">
-                <img class="icon" src="{% static "icons/circle-half-stroke-solid-full.svg" %}">
-            </a>
-            <a class="nav-btn">
-                <img class="icon" src="{% static "icons/square-github-brands-solid-full.svg" %}">
-            </a>
-            <a class="nav-btn"><a class="nav-btn">
-                <img class="icon" src="{% static "icons/square-rss-solid-full.svg" %}">
-            </a>
-        </div>
+    <nav class="nav">
+        <a class="nav-btn" href="/">
+            <span>home</span>
+            <img class="icon link" src="{% static "icons/arrow-up-right-from-square-solid-full.svg" %}">
+        </a>
+        <a class="nav-btn" href="/tags">
+            <span>tags</span>
+            <img class="icon link" src="{% static "icons/arrow-up-right-from-square-solid-full.svg" %}">
+        </a>
+        <a class="nav-btn" href="/about">
+            <span>about</span>
+            <img class="icon link" src="{% static "icons/arrow-up-right-from-square-solid-full.svg" %}">
+        </a>
+    </nav>
+    <div class="links">
+        <a class="btn">
+            <img class="icon" src="{% static "icons/circle-half-stroke-solid-full.svg" %}">
+        </a>
+        <a class="btn">
+            <img class="icon" src="{% static "icons/square-github-brands-solid-full.svg" %}">
+        </a>
+        <a class="btn">
+            <img class="icon" src="{% static "icons/square-rss-solid-full.svg" %}">
+        </a>
     </div>
 </header>
 {% endblock header %}

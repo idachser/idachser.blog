@@ -6,6 +6,19 @@
     --body-size: 50rem;
     --main-color-light: #dedede;
     --main-color-dark: #161616;
+    --secondary-color: #BF092F;
+    --text-color-light: #161616;
+    --secondary-text-light: #545454;
+    --links-color: #ff6f06;
+}
+
+* {
+    box-sizing: inherit;
+}
+
+html {
+    height: 100%;
+    box-sizing: border-box;
 }
 
 body {
@@ -13,11 +26,100 @@ body {
     font-optical-sizing: var(--font-optical-sizing);
     font-weight: var(--font-weight);
     font-style: var(--font-style);
+    height: 100%;
     max-width: var(--body-size);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
     margin: 0 auto;
     padding: 20px 10px;
     background-color: var(--main-color-light);
     color: var(--main-color-dark);
+}
+
+h2::before {
+    content: "## ";
+    font-size: 18px;
+    color: var(--secondary-color);
+}
+
+h3::before {
+    content: "### ";
+    color: var(--secondary-color);
+}
+
+h4::before {
+    content: "#### ";
+    color: var(--secondary-color);
+}
+
+h5::before {
+    content: "##### ";
+    color: var(--secondary-color);
+}
+
+.article-title {
+    margin-bottom: 0;
+}
+
+.article-name {
+    text-decoration: none;
+    color: var(--text-color-light);
+    margin-bottom: 0;
+    transition: color 0.2s;
+}
+
+.article-name:hover {
+    color: var(--links-color);
+}
+
+.pub {
+    display: flex;
+    justify-content: flex-start;
+    color: var(--secondary-text-light);
+}
+
+.pub-info::before {
+    content: "|";
+    margin: 0 0.5em;
+    white-space: nowrap;
+}
+
+.desc {
+    margin-top: 0;
+}
+
+/* Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav {
+    display: flex;
+    gap: 20px;
+}
+
+.links {
+    display: flex;
+    gap: 10px;
+}
+
+.nav-btn {
+    font-weight: bold;
+    text-decoration: none;
+    color: var(--links-color);
+    border-color: var(--secondary-text-light);
+    transition: color 0.2s;
+}
+
+.nav-btn:hover {
+    color: var(--secondary-text-light);
+    border-color: var(--links-color);
+
+    .icon {
+        filter: invert(30%);
+    }
 }
 
 .icon {
@@ -25,7 +127,35 @@ body {
     height: 30px;
 }
 
+.icon:hover {
+    cursor: pointer;
+    filter: invert(30%);
+}
+
 .link {
-    width: 15px;
-    height: 15px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Page title */
+h1 {
+    font-size: 30px;
+    margin-bottom: 0px;
+}
+
+.title::after {
+    content:
+        "========================================="
+        "==========================================";
+    display: block;
+    left: 0;
+}
+
+h2 {
+    font-size: 26px;
+}
+
+
+footer {
+    text-align: center;
 }
