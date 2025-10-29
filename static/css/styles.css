@@ -12,6 +12,8 @@
     --links-color: #ff6f06;
 }
 
+/* Common styles */
+
 * {
     box-sizing: inherit;
 }
@@ -57,6 +59,19 @@ h5::before {
     color: var(--secondary-color);
 }
 
+p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--text-color-light);
+    max-width: 80ch;
+    /* ограничение ширины строки (~60 символов) */
+    margin: 1em 0;
+    text-align: left;
+    hyphens: auto;
+    word-break: keep-all;
+    text-rendering: optimizeLegibility;
+}
+
 .article-title {
     margin-bottom: 0;
 }
@@ -86,6 +101,17 @@ h5::before {
 
 .desc {
     margin-top: 0;
+}
+
+.tags {
+    margin-top: 20px;
+}
+
+.tags::before {
+    content: "---------------------------------------"
+        "--------------------------------------------";
+    display: block;
+    left: 0;
 }
 
 /* Header */
@@ -133,8 +159,8 @@ header {
 }
 
 .link {
-    width: 16px;
-    height: 16px;
+    width: 15px;
+    height: 15px;
 }
 
 /* Page title */
@@ -157,5 +183,6 @@ h2 {
 
 
 footer {
+    padding: 20px 10px;
     text-align: center;
 }

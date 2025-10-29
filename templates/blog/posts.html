@@ -9,13 +9,13 @@
     </h2>
     <div class="pub">
         <p>{{ post.publish_date }}</p>
-        <span class="pub-info">Published by {{ post.author }}</span>
+        <p class="pub-info">Published by {{ post.author }}</p>
         {% if post.tags.all %}
-        <span class="pub-info">
-            {% for tag in post.tags.all %}
-            <span>{{ tag }}</span>{% if not forloop.last %}, {% endif %}
-            {% endfor %}
-        </span>
+        <p class="pub-info">
+        {% for tag in post.tags.all %}
+        <span>{{ tag }}</span>{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+        </p>
         {% endif %}
     </div>
     <p class="desc">{{ post.description }}</p>
