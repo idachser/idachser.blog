@@ -4,12 +4,12 @@
 {% block posts %}
 <div>
     {% for post in posts %}
+    <div class="card">
     <h2 class="article-title">
         <a class="article-name" href="{% url 'post_detail' post.slug %}">{{ post.title }}</a>
     </h2>
     <div class="pub">
         <p>{{ post.publish_date }}</p>
-        <p class="pub-info">Published by {{ post.author }}</p>
         {% if post.tags.all %}
         <p class="pub-info">
         {% for tag in post.tags.all %}
@@ -18,10 +18,8 @@
         </p>
         {% endif %}
     </div>
-    <p class="desc">{{ post.description }}</p>
-    <a class="nav-btn" href="{% url 'post_detail' post.slug %}">
-        <span>Read More</span>
-        <img class="icon link" src="{% static "icons/arrow-up-right-from-square-solid-full.svg" %}">
-    </a>
+    <p class="desc">{{ post.description|safe }}</p>
+    <a class="link" href="{% url 'post_detail' post.slug %}">Read More</a>
+    </div>
     {% endfor %}
 {% endblock %}

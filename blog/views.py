@@ -5,7 +5,10 @@ from .models import Post, Tag
 
 
 def posts_list(request):
+    md = markdown.Markdown(extensions=["fenced_code", "codehilite"])
     posts = get_list_or_404(Post)
+    for post in posts:
+        post.description = md.convert(post.description)
     return render(request, "blog/posts.html", {"posts": posts})
 
 

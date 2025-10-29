@@ -5,15 +5,22 @@
 {% block page_title %}<h1>{{ post.title }}</h1>{% endblock page_title %}
 
 {% block post %}
-<p class="pub">{{ post.publish_date }}</p>
+<div class="pub">
+    <p>{{ post.publish_date }}</p>
+    {% if post.tags.all %}
+            <p class="pub-info">
+            {% for tag in post.tags.all %}
+            <span>{{ tag }}</span>{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+            </p>
+    {% endif %}
+</div>
 <p>{{ post.body|safe }}</p>
 {% if post.tags.all %}
 <div class="tags">
+    <p>Tags: </p>
     {% for tag in post.tags.all  %}
-    <a class="nav-btn" href="/">
-        {{ tag.name }}
-        <img class="icon link" src="{% static "icons/arrow-up-right-from-square-solid-full.svg" %}">
-    </a>
+    <a class="link" href="/">{{ tag.name }}</a>
     {% if not forloop.last %}, {% endif %}
     {% endfor %}
 </div>
