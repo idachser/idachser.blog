@@ -2,9 +2,10 @@
 {% load static %}
 
 {% block posts %}
+{% if posts %}
 <div>
     {% for post in posts %}
-    <div class="card">
+    <article class="card">
     <h2 class="article-title">
         <a class="article-name" href="{% url 'post_detail' post.slug %}">{{ post.title }}</a>
     </h2>
@@ -20,6 +21,9 @@
     </div>
     <p class="desc">{{ post.description|safe }}</p>
     <a class="link" href="{% url 'post_detail' post.slug %}">Read More</a>
-    </div>
+    </article>
     {% endfor %}
+{% else %}
+  <p>No posts yet. Check back soon!</p>
+{% endif %}
 {% endblock %}
