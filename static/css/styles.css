@@ -8,8 +8,10 @@
     --main-color-dark: #161616;
     --secondary-color: #CF0000;
     --text-color-light: #161616;
+    --text-color-dark: #dddddd;
     --secondary-text-light: #545454;
     --links-color: #ff6f06;
+    --codeblock-bg-color-dark: #252525;
 }
 
 /* Common styles */
@@ -34,6 +36,40 @@ body {
     padding: 20px 0;
     background-color: var(--main-color-light);
     color: var(--main-color-dark);
+}
+
+body.dark {
+    background-color: var(--main-color-dark);
+    color: var(--text-color-dark);
+}
+
+body.dark img,
+body.dark .icon a::after {
+    filter: invert(80%);
+}
+
+body.dark a {
+    color: var(--text-color-dark);
+}
+
+body.dark a:hover {
+    color: var(--links-color);
+}
+
+body.dark a::after {
+    filter: invert(0.8);
+}
+
+body.dark .link {
+    color: var(--links-color);
+}
+
+body.dark .link:hover {
+    color: var(--secondary-color);
+}
+
+body.dark .codehilite {
+    background: var(--codeblock-bg-color-dark);
 }
 
 main {
@@ -71,14 +107,13 @@ ul {
 }
 
 li {
-    list-style-type: "-";
+    list-style-type: "- ";
     margin: 0 0 0 0.5em;
 }
 
 p {
     font-size: 1.1rem;
     line-height: 1.6;
-    color: var(--text-color-light);
     max-width: 80ch;
     margin: 1em 0;
     text-align: left;
@@ -91,6 +126,10 @@ a {
     text-decoration: none;
     border-bottom: solid 2px var(--secondary-color);
     transition: color 0.2s;
+}
+
+a.dark {
+    color: var(--text-color-dark);
 }
 
 a:hover {
@@ -117,6 +156,7 @@ blockquote {
     }
 }
 
+
 .card {
     margin-bottom: 40px;
 }
@@ -127,7 +167,6 @@ blockquote {
 
 .article-name {
     text-decoration: none;
-    color: var(--text-color-light);
     margin-bottom: 0;
     border: none;
     transition: color 0.2s;
