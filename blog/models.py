@@ -11,7 +11,7 @@ class Tag(models.Model):
 
 class Post(models.Model):
     title = models.CharField(max_length=200, unique=True)
-    description = models.CharField(max_length=500, blank=True)
+    description = models.TextField(max_length=500, blank=True)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     publish_date = models.DateField()
     published = models.BooleanField(default=False)
@@ -30,3 +30,12 @@ class Post(models.Model):
             self.slug = slugify(self.title)
 
         super().save(*args, **kwargs)
+
+
+def media_file_path(instance, filename) -> str:
+    return f"post_{instance.post.id}/media/{filename}"
+
+
+class MediaFile(models.Model):
+    post = models.ForeignKey(Post, related_name="post_media", on_delete=models.CASCADE)
+    file = models.FileField(upload_to=media_file_path, blank=True)

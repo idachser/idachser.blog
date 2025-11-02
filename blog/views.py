@@ -5,7 +5,7 @@ from .models import Post, Tag
 
 
 def posts_list(request):
-    md = markdown.Markdown(extensions=["fenced_code", "codehilite"])
+    md = markdown.Markdown(extensions=["fenced_code", "codehilite", "extra"])
     posts = Post.objects.filter(published=True).order_by("-publish_date")
     for post in posts:
         post.description = md.convert(post.description)
