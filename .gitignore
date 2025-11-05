@@ -11,3 +11,4 @@ wheels/
 
 # DB
 .website_pgpass
+uploads/

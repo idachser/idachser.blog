@@ -122,8 +122,11 @@ a::after {
 }
 
 img {
+    display: block;
+    margin: 0 auto;
     max-width: 100%;
-    height: 300px;
+    height: auto;
+    border-radius: 10px;
 }
 
 blockquote {
@@ -262,7 +265,11 @@ html.dark body {
     color: var(--text-color-dark);
 }
 
-html.dark .icon a::after {
+html.dark img.icon {
+    filter: invert(80%);
+}
+
+html.dark a::after {
     filter: invert(80%);
 }
 
