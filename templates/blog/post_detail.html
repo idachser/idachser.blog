@@ -20,7 +20,7 @@
 <div class="tags">
     <p>Tags: </p>
     {% for tag in post.tags.all  %}
-    <a class="link" href="/">{{ tag.name }}</a>
+    <a class="link" href="{% url 'tagged_posts' tag.name %}">{{ tag.name }}</a>
     {% if not forloop.last %}, {% endif %}
     {% endfor %}
 </div>
