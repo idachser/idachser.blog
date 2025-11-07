@@ -1,5 +1,9 @@
+from io import BytesIO
+
+from django.core.files.base import ContentFile
 from django.db import models
 from django.utils.text import slugify
+from PIL import Image
 
 
 class Tag(models.Model):
@@ -39,3 +43,19 @@ def media_file_path(instance, filename) -> str:
 class MediaFile(models.Model):
     post = models.ForeignKey(Post, related_name="post_media", on_delete=models.CASCADE)
     file = models.FileField(upload_to=media_file_path, blank=True)
+
+    def save(self, *args, **kwargs):
+        """compress file and save"""
+
+        img = Image.open(self.file)
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+
+        max_size = (1920, 1080)
+        img.thumbnail(max_size, Image.Resampling.LANCZOS)
+
+        buff = BytesIO()
+        img.save(buff, format="JPEG", optimize=True, quality=75)
+        self.file.save(self.file.name, ContentFile(buff.getvalue()), save=False)
+        buff.close()
+        super().save(*args, **kwargs)
