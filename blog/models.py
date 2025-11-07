@@ -1,5 +1,7 @@
+import os
 from io import BytesIO
 
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import models
 from django.utils.text import slugify
@@ -32,8 +34,17 @@ class Post(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
-
         super().save(*args, **kwargs)
+
+    def delete(self, using=None, keep_parents=False):
+        for media in self.post_media.all():
+            media.delete()
+
+        post_media_dir = os.path.join(settings.MEDIA_ROOT, f"post_{self.id}", "media")
+        if os.path.exists(post_media_dir):
+            os.removedirs(post_media_dir)
+
+        return super().delete(using, keep_parents)
 
 
 def media_file_path(instance, filename) -> str:
@@ -59,3 +70,8 @@ class MediaFile(models.Model):
         self.file.save(self.file.name, ContentFile(buff.getvalue()), save=False)
         buff.close()
         super().save(*args, **kwargs)
+
+    def delete(self, using=None, keep_parents=False):
+        if self.file and os.path.isfile(self.file.path):
+            os.remove(self.file.path)
+        return super().delete(using, keep_parents)
