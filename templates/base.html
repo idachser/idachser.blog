@@ -16,11 +16,12 @@
             } catch (e) {}
         })();
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/gruvbox_dark.css' %}">
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet"/>
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="{% url 'posts_feed' %}" />
+    <link rel="stylesheet" href="{% static 'css/gruvbox_dark.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"/>
     <script type="text/javascript" src="{% static 'js/toggle_theme.js' %}" defer></script>
 </head>
 

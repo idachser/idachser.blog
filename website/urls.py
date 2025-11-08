@@ -3,7 +3,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from rss.feeds import PostsFeed
+
 urlpatterns = [
+    path("rss/", PostsFeed(), name="posts_feed"),
     path("about/", include("pages.urls")),
     path("", include("blog.urls")),
     path("admin/", admin.site.urls),
