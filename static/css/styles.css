@@ -48,6 +48,10 @@ hr {
 }
 
 h1 {
+    font-family: "Pixelify Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
     font-size: 30px;
     margin-bottom: 0px;
 }
@@ -295,4 +299,69 @@ html.dark .link:hover {
 
 html.dark .codehilite {
     background: var(--codeblock-bg-color-dark);
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+        max-width: 100%;
+    }
+
+    .nav {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .btns {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    p {
+        font-size: 1rem;
+        line-height: 1.5;
+        text-align: justify;
+    }
+
+    .pub {
+        align-items: flex-start;
+
+        p {
+            font-size: 0.8rem;
+        }
+    }
+
+    .tags::before {
+        font-size: 12px;
+        content: "-------------------------------------------------";
+    }
+
+    .icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    img {
+        border-radius: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+
+    h2 {
+        font-size: 20px;
+    }
+
+    p {
+        font-size: 0.95rem;
+    }
+
+    .icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .title::after {
+        content: "=====================================";
+    }
 }
