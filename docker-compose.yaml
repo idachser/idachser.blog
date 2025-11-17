@@ -1,0 +1,54 @@
+services:
+  web:
+    build: .
+    container_name: mywebsite
+    ports: 
+      - "8000:8000"
+    env_file: .env
+    environment:
+      PGSERVICEFILE: /home/app/.pg_service.conf
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+      - static_volume:/app/static
+      - media_volume:/app/uploads
+      - ./.pg_service.conf:/home/app/.pg_service.conf
+      - ./.website_pgpass:/home/app/.website_pgpass
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+          ignore:
+            - .venv/
+        - action: rebuild
+          path: ./uv.lock
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  db:
+    image: postgres:latest
+    secrets:
+      - db_password
+    env_file: .env
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    ports:
+      - "5433:5432"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+
+secrets:
+  db_password:
+    file: ./secrets/db_password

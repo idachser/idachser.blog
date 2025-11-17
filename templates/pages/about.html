@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}About Me{% endblock title %}
-{% block page_title %}<h1>About Me</h1>{% endblock page_title %}
+{% block title %}About{% endblock title %}
+{% block page_title %}<h1>About</h1>{% endblock page_title %}
 
 {% block about %}
     {% if info %}
-    <p>{{ info.body }}</p>
+    <p>{{ info.body|safe }}</p>
     {% else %}
     <p>Hello, World!</p>
     {% endif %}

@@ -9,7 +9,9 @@ wheels/
 .venv
 .env
 
+.pg_service.conf
 .website_pgpass
+secrets/
 uploads/
 
 *.log
