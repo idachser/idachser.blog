@@ -16,7 +16,13 @@ class Tag(models.Model):
 
 
 class Post(models.Model):
+    LANGUAGE_CHOICES = {
+        "en": "english",
+        "de": "deutsch",
+        "ru": "russian",
+    }
     title = models.CharField(max_length=200, unique=True)
+    language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default="de")
     description = models.TextField(max_length=500, blank=True)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     publish_date = models.DateField()
