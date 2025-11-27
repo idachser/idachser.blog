@@ -98,6 +98,23 @@ ul {
     line-height: 1.6;
 }
 
+p {
+    max-width: 80ch;
+    margin: 1em 0;
+    text-align: left;
+    hyphens: auto;
+    word-break: keep-all;
+}
+
+p code {
+    font-size: 1rem;
+    padding: 1px 3px;
+    background-color: var(--secondary-text-light);
+    color: var(--text-color-dark);
+    border-radius: 3px;
+    transition: color 0.2s;
+}
+
 p,
 li {
     font-size: clamp(1rem, 1.8vw, 1.1rem);
@@ -107,14 +124,6 @@ li {
 li {
     list-style-type: "- ";
     margin: 0 0 0 0.5em;
-}
-
-p {
-    max-width: 80ch;
-    margin: 1em 0;
-    text-align: left;
-    hyphens: auto;
-    word-break: keep-all;
 }
 
 a {
@@ -131,6 +140,10 @@ a.dark {
 a:hover {
     color: var(--links-color);
     border-color: var(--secondary-text-light);
+
+    code {
+        background-color: var(--links-color);
+    }
 }
 
 a::after {
