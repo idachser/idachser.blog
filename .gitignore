@@ -13,5 +13,7 @@ wheels/
 .website_pgpass
 secrets/
 uploads/
+staticfiles/
+nginx/
 
 *.log

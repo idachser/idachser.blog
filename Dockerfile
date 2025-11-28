@@ -17,8 +17,6 @@ COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev
 
-# RUN .venv/bin/python manage.py collectstatic --noinput
-
 ENV PATH="/app/.venv/bin:$PATH"
 
 # RUN groupadd --system --gid 999 nonroot \
@@ -27,5 +25,5 @@ ENV PATH="/app/.venv/bin:$PATH"
 # 
 # USER nonroot
 
-CMD ["uv", "run", "manage.py", "runserver", "0.0.0.0:8000"]
-# CMD ["gunicorn", "website.wsgi:application", "--bind", "0.0.0.0:8000"]
+# CMD ["uv", "run", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["uv", "run", "gunicorn", "website.wsgi:application", "--bind", "0.0.0.0:8000"]
