@@ -62,6 +62,8 @@ services:
       - ./certbot/conf:/etc/letsencrypt
     depends_on:
       - web
+    networks:
+      - default
 
   certbot:
     image: certbot/certbot
@@ -76,6 +78,10 @@ volumes:
   postgres_data:
   static_volume:
   media_volume:
+
+networks:
+  default:
+    name: idachserblog_default
 
 secrets:
   db_password:
