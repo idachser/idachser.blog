@@ -19,11 +19,5 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-# RUN groupadd --system --gid 999 nonroot \
-#  && useradd --system --gid 999 --uid 999 --create-home nonroot
-# RUN chown -R nonroot:nonroot /app /app/.venv
-# 
-# USER nonroot
-
 # CMD ["uv", "run", "manage.py", "runserver", "0.0.0.0:8000"]
-CMD ["uv", "run", "gunicorn", "website.wsgi:application", "--bind", "0.0.0.0:8000"]
+# CMD ["uv", "run", "gunicorn", "website.wsgi:application", "--bind", "0.0.0.0:8000"]

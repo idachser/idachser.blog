@@ -38,6 +38,8 @@ CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
 
 ADMINS = [(os.getenv("ADMIN_NAME", ""), os.getenv("ADMIN_EMAIL"))]
 
+ADMIN_URL = os.getenv("ADMIN_URL", "admin/")
+
 # Application definition
 INSTALLED_APPS = [
     "rss.apps.RssConfig",
