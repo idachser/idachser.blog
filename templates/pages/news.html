@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}News{% endblock title %}
+{% block page_title %}<h1>News</h1>{% endblock page_title %}
+
+{% block news %}
+    {% if news %}
+    <p>news</p>
+    {% else %}
+    <p>No news yet.</p>
+    {% endif %}
+<div class="etc">
+    <p>All news provided by:</p>
+        <a href="https://www.golem.de/">Golem.de</a>
+        <a href="https://www.spektrum.de/">Spectrum.de</a>
+    </p>
+</div>
+{% endblock news %}

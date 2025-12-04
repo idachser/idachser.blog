@@ -9,3 +9,7 @@ def about(request):
     about_info = get_object_or_404(AboutMeInfo)
     about_info.body = md.convert(about_info.body)
     return render(request, "pages/about.html", {"info": about_info})
+
+
+def news(request):
+    return render(request, "pages/news.html")
