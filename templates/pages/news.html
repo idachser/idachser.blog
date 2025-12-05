@@ -5,12 +5,31 @@
 
 {% block news %}
     {% if news %}
-    <p>news</p>
+        {% for entry in news %}
+        <article class="card">
+            <h4 class="article-title">
+                <a class="article-name" href="{{ entry.link }}">{{ entry.title }}</a>
+            </h4>
+            <div class="pub">
+                <p>{{ entry.pub_date|date:"M. d, Y, H:i" }}</p>
+
+                {% if entry.categories %}
+                <p class="pub-info">
+                    {% for cat in entry.categories  %}
+                    <span>{{ cat }}</span>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+                {% endif %}
+            </div>
+            <p class="desc">{{ entry.desc|safe }}</p>
+            <a class="link" href="{{ entry.link }}">Read More</a>
+        </article>
+        {% endfor %}
     {% else %}
-    <p>No news yet.</p>
+        <p>No news yet.</p>
     {% endif %}
 <div class="etc">
-    <p>All news provided by:</p>
+    <p>All news provided by:
         <a href="https://www.golem.de/">Golem.de</a>
         <a href="https://www.spektrum.de/">Spectrum.de</a>
     </p>

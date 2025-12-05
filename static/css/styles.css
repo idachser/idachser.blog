@@ -217,18 +217,18 @@ blockquote {
     margin-top: 0;
 }
 
-.tags {
+.etc {
     margin: 20px 0;
 }
 
-.tags::before {
+.etc::before {
     content: "---------------------------------------"
         "--------------------------------------------";
     display: block;
     left: 0;
 }
 
-.tags p {
+.etc p {
     display: inline;
 }
 
@@ -365,7 +365,7 @@ html.dark .codehilite {
         }
     }
 
-    .tags::before {
+    .etc::before {
         font-size: 12px;
         content: "-------------------------------------------------";
     }
