@@ -2,8 +2,6 @@ services:
   web:
     build: .
     container_name: mywebsite
-    ports: 
-      - "8000:8000"
     env_file: .env
     environment:
       PGSERVICEFILE: /home/app/.pg_service.conf
