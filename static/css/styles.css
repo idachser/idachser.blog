@@ -390,6 +390,10 @@ html.dark .codehilite {
         font-size: 0.95rem;
     }
 
+    p code {
+        font-size: 0.95rem;
+    }
+
     .icon {
         width: 20px;
         height: 20px;
