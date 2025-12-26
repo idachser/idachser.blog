@@ -38,7 +38,7 @@ services:
     environment:
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
     volumes:
-      - postgres_data:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
   nginx:
