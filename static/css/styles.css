@@ -278,6 +278,12 @@ header {
     filter: invert(30%);
 }
 
+.media {}
+
+.media:hover {
+    cursor: pointer;
+}
+
 /* Page title */
 .title::after {
     content:
@@ -285,6 +291,36 @@ header {
         "==========================================";
     display: block;
     left: 0;
+}
+
+/* Lightbox */
+
+.lightbox {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+}
+
+.lightbox img {
+    max-width: 90%;
+    max-height: 80%;
+    border-radius: 10px;
+}
+
+.lightbox .close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 40px;
+    color: white;
+    cursor: pointer;
 }
 
 /* Footer */
@@ -335,6 +371,7 @@ html.dark .codehilite {
     background: var(--codeblock-bg-color-dark);
 }
 
+/* Response Design */
 @media (max-width: 768px) {
     body {
         padding: 10px;

@@ -23,7 +23,7 @@ def tagged_posts_list(request, tag_slug):
 
 
 def post_detail(request, slug):
-    md = markdown.Markdown(extensions=["fenced_code", "codehilite"])
+    md = markdown.Markdown(extensions=["fenced_code", "codehilite", "extra"])
     post = get_object_or_404(Post, slug=slug)
     post.body = md.convert(post.body)
     context = {"post": post}
