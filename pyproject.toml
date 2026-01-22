@@ -12,4 +12,5 @@ dependencies = [
     "psycopg[binary]>=3.2.10",
     "pygments>=2.19.2",
     "python-dotenv>=1.2.1",
+    "python-markdown-math>=0.9",
 ]
