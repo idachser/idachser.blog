@@ -16,7 +16,7 @@ def render_md(text):
 
 def posts_list(request):
     posts = Post.objects.filter(published=True).order_by("-publish_date")
-    paginator = Paginator(posts, 1)
+    paginator = Paginator(posts, 5)
 
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
