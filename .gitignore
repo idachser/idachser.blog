@@ -18,3 +18,4 @@ nginx/
 docker-compose-test.yaml
 
 *.log
+todo.txt
