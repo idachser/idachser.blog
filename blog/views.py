@@ -1,4 +1,5 @@
 import markdown
+from django.core.paginator import Paginator
 from django.shortcuts import get_list_or_404, get_object_or_404, render
 
 from .models import Post, Tag
@@ -15,9 +16,15 @@ def render_md(text):
 
 def posts_list(request):
     posts = Post.objects.filter(published=True).order_by("-publish_date")
+    paginator = Paginator(posts, 1)
+
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
     for post in posts:
         post.description = render_md(post.description)
-    return render(request, "blog/posts.html", {"posts": posts})
+
+    return render(request, "blog/posts.html", {"posts": page_obj})
 
 
 def tagged_posts_list(request, tag_slug):
