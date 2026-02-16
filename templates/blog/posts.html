@@ -24,17 +24,19 @@
     {% endfor %}
 
     {% block pagination %}
-    <div class="pagination">
-        {% if posts.has_previous %}
-            <a href="?page={{ posts.previous_page_number }}">&lt;&lt;</a>
-        {% endif%}
+    {% if posts.count > 1 %}
+        <div class="pagination">
+            {% if posts.has_previous %}
+                <a href="?page={{ posts.previous_page_number }}">&lt;&lt;</a>
+            {% endif%}
 
-        <span>{{ posts.number }} of {{ posts.paginator.num_pages }}</span>
+            <span>{{ posts.number }} of {{ posts.paginator.num_pages }}</span>
 
-        {% if posts.has_next %}
-            <a href="?page={{ posts.next_page_number }}">&gt;&gt;</a>
-        {% endif%}
-    </div>
+            {% if posts.has_next %}
+                <a href="?page={{ posts.next_page_number }}">&gt;&gt;</a>
+            {% endif%}
+        </div>
+    {% endif %}
     {% endblock %}
 
 {% else %}

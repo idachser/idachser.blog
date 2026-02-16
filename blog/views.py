@@ -30,9 +30,16 @@ def posts_list(request):
 def tagged_posts_list(request, tag_slug):
     tag = get_object_or_404(Tag, name=tag_slug)
     posts = get_list_or_404(Post, tags=tag, published=True)
+    paginator = Paginator(posts, 5)
+
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
     for post in posts:
         post.description = render_md(post.description)
-    context = {"tag": tag, "posts": posts}
+
+    context = {"tag": tag, "posts": page_obj}
+
     return render(request, "blog/posts.html", context=context)
 
 
@@ -40,6 +47,7 @@ def post_detail(request, slug):
     post = get_object_or_404(Post, slug=slug)
     post.body = render_md(post.body)
     context = {"post": post}
+
     return render(request, "blog/post_detail.html", context)
 
 
