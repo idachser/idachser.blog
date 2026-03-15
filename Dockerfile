@@ -1,11 +1,10 @@
 FROM ghcr.io/astral-sh/uv:python3.12-trixie-slim
 
 RUN useradd -m appuser
-
 WORKDIR /app
 RUN chown -R appuser:appuser /app
-
 USER appuser
+RUN mkdir -p /app/staticfiles /app/uploads
 
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
