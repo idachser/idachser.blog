@@ -1,6 +1,8 @@
 FROM ghcr.io/astral-sh/uv:python3.12-trixie-slim
 
-RUN useradd -m appuser
+RUN set -eux; \
+    if ! getent group 1000 >/dev/null; then groupadd -g 1000 appuser; fi; \
+    useradd -m -u 1000 -g 1000 appuser
 WORKDIR /app
 RUN chown -R appuser:appuser /app
 USER appuser

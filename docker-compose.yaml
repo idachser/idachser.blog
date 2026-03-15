@@ -1,28 +1,38 @@
 services:
+  init-perms:
+    image: alpine:3.20
+    container_name: mywebsite-init-perms
+    user: "0:0"
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/uploads
+    restart: "no"
+    command: >
+      sh -lc "
+        set -e;
+        mkdir -p /app/staticfiles /app/uploads;
+        chown -R 1000:1000 /app/staticfiles /app/uploads
+      "
+
   web:
     build: .
     container_name: mywebsite
+    user: "1000:1000"
     env_file: .env
     environment:
-      PGSERVICEFILE: /home/app/.pg_service.conf
+      PGSERVICEFILE: /home/appuser/.pg_service.conf
+      PASSFILE: /home/appuser/.website_pgpass
     depends_on:
-      - db
+      db:
+        condition: service_started
+      init-perms:
+        condition: service_completed_successfully
     volumes:
-      - .:/app
       - static_volume:/app/staticfiles
       - media_volume:/app/uploads
-      - ./.pg_service.conf:/home/app/.pg_service.conf
-      - ./.website_pgpass:/home/app/.website_pgpass
+      - ./.pg_service.conf:/home/appuser/.pg_service.conf:ro
+      - ./.website_pgpass:/home/appuser/.website_pgpass:ro
     restart: unless-stopped
-    develop:
-      watch:
-        - action: sync
-          path: .
-          target: /app
-          ignore:
-            - .venv/
-        - action: rebuild
-          path: ./uv.lock
     command: >
       sh -c "
         uv run manage.py migrate &&
