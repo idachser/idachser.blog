@@ -31,7 +31,7 @@ services:
       "
 
   db:
-    image: postgres:latest
+    image: postgres:17
     secrets:
       - db_password
     env_file: .env
