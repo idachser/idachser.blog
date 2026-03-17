@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -39,6 +40,7 @@ CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
 ADMINS = [(os.getenv("ADMIN_NAME", ""), os.getenv("ADMIN_EMAIL"))]
 
 ADMIN_URL = os.getenv("ADMIN_URL", "admin/")
+RUNNING_TESTS = "test" in sys.argv
 
 # Application definition
 INSTALLED_APPS = [
@@ -53,6 +55,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 ]
 
+if RUNNING_TESTS:
+    INSTALLED_APPS = [app for app in INSTALLED_APPS if app != "django.contrib.admin"]
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -63,7 +68,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "website.urls"
+ROOT_URLCONF = "website.test_urls" if RUNNING_TESTS else "website.urls"
 
 TEMPLATES = [
     {
@@ -85,15 +90,23 @@ WSGI_APPLICATION = "website.wsgi.application"
 
 
 # Database
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "OPTIONS": {
-            "service": "website-service",
-            "passfile": os.getenv("PASSFILE"),
-        },
+if RUNNING_TESTS:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "test_db.sqlite3",
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "OPTIONS": {
+                "service": "website-service",
+                "passfile": os.getenv("PASSFILE"),
+            },
+        }
+    }
 
 
 # Password validation

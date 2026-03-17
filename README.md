@@ -73,4 +73,4 @@ Notes:
 uv run manage.py test
 ```
 
-Current tests are placeholders.
+Tests use SQLite automatically, so they do not require the local PostgreSQL service configuration.
