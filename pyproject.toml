@@ -14,3 +14,14 @@ dependencies = [
     "python-dotenv>=1.2.1",
     "python-markdown-math>=0.9",
 ]
+
+[tool.ruff]
+exclude = [".venv"]
+line-length = 80
+
+[tool.ruff.lint]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-format = true

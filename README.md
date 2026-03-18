@@ -33,16 +33,6 @@ Stop:
 docker compose -f docker-compose-test.yaml down
 ```
 
-## Run Locally (without Docker)
-
-```bash
-uv sync
-export PGSERVICEFILE="$(pwd)/.pg_service.conf"
-export PASSFILE="$(pwd)/.website_pgpass"
-uv run manage.py migrate
-uv run manage.py runserver
-```
-
 ## Production Compose
 
 `docker-compose.yaml` starts:
@@ -54,18 +44,6 @@ uv run manage.py runserver
 ```bash
 docker compose up --build -d
 ```
-
-## Content Workflow
-
-Use admin to:
-- create tags
-- create posts
-- attach media files to posts
-- manage About page content
-
-Notes:
-- post media is converted to JPEG and downscaled (max 1920x1080)
-- About page is intentionally single-record in admin
 
 ## Tests
 
