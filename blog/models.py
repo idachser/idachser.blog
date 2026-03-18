@@ -2,10 +2,13 @@ import os
 from io import BytesIO
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import models
 from django.utils.text import slugify
 from PIL import Image
+
+MAX_UPLOAD_PIXELS = 20_000_000
 
 
 class Tag(models.Model):
@@ -64,7 +67,24 @@ class MediaFile(models.Model):
     def save(self, *args, **kwargs):
         """compress file and save"""
 
-        img = Image.open(self.file)
+        if not self.file:
+            return super().save(*args, **kwargs)
+
+        try:
+            self.file.seek(0)
+            with Image.open(self.file) as uploaded_image:
+                uploaded_image.verify()
+
+            self.file.seek(0)
+            with Image.open(self.file) as uploaded_image:
+                uploaded_image.load()
+                img = uploaded_image.copy()
+        except (Image.DecompressionBombError, OSError) as exc:
+            raise ValidationError("Upload must be a valid, safe image.") from exc
+
+        if img.width * img.height > MAX_UPLOAD_PIXELS:
+            raise ValidationError("Image is too large.")
+
         if img.mode != "RGB":
             img = img.convert("RGB")
 

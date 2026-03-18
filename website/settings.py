@@ -3,23 +3,25 @@ import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+RUNNING_TESTS = "test" in sys.argv
 
 load_dotenv()
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = (
-    os.getenv("DJANGO_KEY")
-    or "django-insecure-bk5+$n#qj7+6w*^0)wqdo22et%3^&uekudo+qi^#77$v@d*etk"
-)
+SECRET_KEY = os.getenv("DJANGO_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
+
+if not SECRET_KEY:
+    if DEBUG or RUNNING_TESTS:
+        SECRET_KEY = "django-insecure-local-development-key"
+    else:
+        raise ImproperlyConfigured("DJANGO_KEY must be set when DEBUG is False.")
 
 if not DEBUG:
     CSRF_COOKIE_SECURE = True
@@ -40,7 +42,6 @@ CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
 ADMINS = [(os.getenv("ADMIN_NAME", ""), os.getenv("ADMIN_EMAIL"))]
 
 ADMIN_URL = os.getenv("ADMIN_URL", "admin/")
-RUNNING_TESTS = "test" in sys.argv
 
 # Application definition
 INSTALLED_APPS = [
@@ -128,7 +129,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "UTC"
@@ -149,8 +149,6 @@ MEDIA_ROOT = BASE_DIR / "uploads"
 MEDIA_URL = "media/"
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGGING = {

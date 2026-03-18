@@ -1,12 +1,18 @@
+import os
 from datetime import date
+from io import BytesIO
+from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 
+from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import Http404, HttpResponse
 from django.test import RequestFactory, TestCase
+from PIL import Image
 
 from rss.feeds import PostsFeed
 
-from .models import Post, Tag
+from .models import MediaFile, Post, Tag
 from . import views
 
 
@@ -134,17 +140,13 @@ class BlogViewTests(TestCase):
         self.assertEqual(post_in_context.body, "rendered-body")
         render_md.assert_called_once_with("**content**")
 
-    def test_post_detail_exposes_unpublished_post_by_slug(self):
+    def test_post_detail_returns_404_for_unpublished_post(self):
         post = self.create_post("Draft Detail", date(2025, 3, 2), published=False)
 
         request = self.factory.get(f"/post/{post.slug}/")
-        capture = Mock(return_value=HttpResponse("ok"))
 
-        with patch.object(views, "render", capture):
-            response = views.post_detail(request, post.slug)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(capture.call_args.args[2]["post"].pk, post.pk)
+        with self.assertRaises(Http404):
+            views.post_detail(request, post.slug)
 
     def test_tags_list_returns_all_tags(self):
         request = self.factory.get("/tags/")
@@ -168,6 +170,12 @@ class BlogModelAndFeedTests(TestCase):
             description="desc",
         )
 
+    def make_uploaded_image(self, *, size=(50, 50), color="red", name="image.png"):
+        buff = BytesIO()
+        image = Image.new("RGB", size, color=color)
+        image.save(buff, format="PNG")
+        return SimpleUploadedFile(name, buff.getvalue(), content_type="image/png")
+
     def test_post_save_generates_slug_from_title(self):
         post = self.create_post("Hello Django World", date(2025, 4, 1))
 
@@ -182,3 +190,27 @@ class BlogModelAndFeedTests(TestCase):
         items = list(PostsFeed().items())
 
         self.assertEqual(items, [newest, middle, older])
+
+    def test_media_file_save_rejects_non_image_uploads(self):
+        post = self.create_post("With Upload", date(2025, 5, 1))
+        upload = SimpleUploadedFile("broken.txt", b"not-an-image", content_type="text/plain")
+
+        with self.assertRaises(ValidationError):
+            MediaFile(post=post, file=upload).save()
+
+    def test_post_delete_removes_saved_media_file(self):
+        post = self.create_post("With Media", date(2025, 5, 2))
+
+        with TemporaryDirectory() as media_root:
+            with self.settings(MEDIA_ROOT=media_root):
+                media = MediaFile(post=post, file=self.make_uploaded_image())
+                media.save()
+                saved_path = media.file.path
+
+                self.assertTrue(saved_path.endswith("image.png"))
+                with Image.open(saved_path) as saved_image:
+                    self.assertEqual(saved_image.format, "JPEG")
+
+                post.delete()
+
+                self.assertFalse(os.path.exists(saved_path))

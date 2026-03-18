@@ -44,7 +44,7 @@ def tagged_posts_list(request, tag_slug):
 
 
 def post_detail(request, slug):
-    post = get_object_or_404(Post, slug=slug)
+    post = get_object_or_404(Post, slug=slug, published=True)
     post.body = render_md(post.body)
     context = {"post": post}
 
