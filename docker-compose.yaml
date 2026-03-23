@@ -15,7 +15,7 @@ services:
       "
 
   web:
-    build: .
+    image: ${WEB_IMAGE:-ghcr.io/idachser/idachser.blog:latest}
     container_name: mywebsite
     user: "1000:1000"
     env_file: .env
