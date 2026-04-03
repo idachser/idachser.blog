@@ -1,0 +1,30 @@
+name: Setup Python Environment
+description: Check out the repository, install Python and uv, and sync dependencies.
+inputs:
+  python-version:
+    description: Python version to install.
+    required: false
+    default: "3.12"
+  uv-sync-args:
+    description: Arguments passed to uv sync.
+    required: false
+    default: "--locked"
+runs:
+  using: composite
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        enable-cache: true
+
+    - name: Install dependencies
+      shell: bash
+      run: uv sync ${{ inputs.uv-sync-args }}

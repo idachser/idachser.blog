@@ -20,21 +20,8 @@ jobs:
       DJANGO_KEY: ci-secret-key
       DJANGO_DEBUG: "True"
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v4
-        with:
-          enable-cache: true
-
-      - name: Install dependencies
-        run: uv sync --locked
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
 
       - name: Run tests
         run: uv run manage.py test
