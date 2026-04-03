@@ -8,6 +8,7 @@ wheels/
 
 .venv
 .env
+.codex
 
 .pg_service.conf
 .website_pgpass

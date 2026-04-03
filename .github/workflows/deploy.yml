@@ -20,6 +20,9 @@ jobs:
       DJANGO_KEY: ci-secret-key
       DJANGO_DEBUG: "True"
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Set up Python environment
         uses: ./.github/actions/setup-python-env
 
