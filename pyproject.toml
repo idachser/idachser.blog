@@ -15,6 +15,11 @@ dependencies = [
     "python-markdown-math>=0.9",
 ]
 
+[dependency-groups]
+dev = [
+    "ruff>=0.13.2",
+]
+
 [tool.ruff]
 exclude = [".venv"]
 line-length = 80

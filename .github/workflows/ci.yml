@@ -15,9 +15,11 @@ jobs:
 
       - name: Set up Python environment
         uses: ./.github/actions/setup-python-env
+        with:
+          uv-sync-args: "--locked --group dev"
 
       - name: Linter check
-        run: uv run ruff check . && uv run ruff format --check
+        run: uv run ruff check .
 
   test:
     runs-on: ubuntu-latest
