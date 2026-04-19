@@ -22,7 +22,16 @@ class BlogViewTests(TestCase):
         self.tag = Tag.objects.create(name="django")
         self.other_tag = Tag.objects.create(name="python")
 
-    def create_post(self, title, publish_date, *, published=True, tags=None, body="body", description="desc"):
+    def create_post(
+        self,
+        title,
+        publish_date,
+        *,
+        published=True,
+        tags=None,
+        body="body",
+        description="desc",
+    ):
         post = Post.objects.create(
             title=title,
             publish_date=publish_date,
@@ -34,13 +43,27 @@ class BlogViewTests(TestCase):
             post.tags.set(tags)
         return post
 
-    @patch.object(views, "render_md", side_effect=lambda text: f"rendered::{text}")
-    def test_posts_list_filters_paginates_and_renders_descriptions(self, render_md):
+    @patch.object(
+        views, "render_md", side_effect=lambda text: f"rendered::{text}"
+    )
+    def test_posts_list_filters_paginates_and_renders_descriptions(
+        self, render_md
+    ):
         posts = [
-            self.create_post(f"Post {index}", date(2025, 1, index), tags=[self.tag], description=f"desc-{index}")
+            self.create_post(
+                f"Post {index}",
+                date(2025, 1, index),
+                tags=[self.tag],
+                description=f"desc-{index}",
+            )
             for index in range(1, 7)
         ]
-        self.create_post("Draft Post", date(2025, 1, 10), published=False, description="draft")
+        self.create_post(
+            "Draft Post",
+            date(2025, 1, 10),
+            published=False,
+            description="draft",
+        )
 
         request = self.factory.get("/")
         capture = Mock(return_value=HttpResponse("ok"))
@@ -53,7 +76,10 @@ class BlogViewTests(TestCase):
         page = capture.call_args.args[2]["posts"]
         self.assertEqual(page.paginator.count, 6)
         self.assertEqual(len(page.object_list), 5)
-        self.assertEqual([post.title for post in page.object_list], [post.title for post in reversed(posts[1:])])
+        self.assertEqual(
+            [post.title for post in page.object_list],
+            [post.title for post in reversed(posts[1:])],
+        )
         render_md.assert_any_call("desc-1")
         render_md.assert_any_call("desc-6")
         self.assertEqual(render_md.call_count, 6)
@@ -74,7 +100,9 @@ class BlogViewTests(TestCase):
         self.assertFalse(page.has_next())
         self.assertEqual([post.title for post in page.object_list], ["Post 1"])
 
-    @patch.object(views, "render_md", side_effect=lambda text: f"rendered::{text}")
+    @patch.object(
+        views, "render_md", side_effect=lambda text: f"rendered::{text}"
+    )
     def test_tagged_posts_list_filters_by_tag_and_publication(self, render_md):
         tagged_new = self.create_post(
             "Tagged New",
@@ -88,8 +116,19 @@ class BlogViewTests(TestCase):
             tags=[self.tag],
             description="old-tagged",
         )
-        self.create_post("Other Tag", date(2025, 2, 3), tags=[self.other_tag], description="other-tag")
-        self.create_post("Tagged Draft", date(2025, 2, 4), published=False, tags=[self.tag], description="draft")
+        self.create_post(
+            "Other Tag",
+            date(2025, 2, 3),
+            tags=[self.other_tag],
+            description="other-tag",
+        )
+        self.create_post(
+            "Tagged Draft",
+            date(2025, 2, 4),
+            published=False,
+            tags=[self.tag],
+            description="draft",
+        )
 
         request = self.factory.get(f"/tags/{self.tag.name}")
         capture = Mock(return_value=HttpResponse("ok"))
@@ -115,8 +154,12 @@ class BlogViewTests(TestCase):
         with self.assertRaises(Http404):
             views.tagged_posts_list(request, "missing")
 
-    def test_tagged_posts_list_returns_404_when_only_unpublished_posts_match(self):
-        self.create_post("Tagged Draft", date(2025, 2, 4), published=False, tags=[self.tag])
+    def test_tagged_posts_list_returns_404_when_only_unpublished_posts_match(
+        self,
+    ):
+        self.create_post(
+            "Tagged Draft", date(2025, 2, 4), published=False, tags=[self.tag]
+        )
 
         request = self.factory.get(f"/tags/{self.tag.name}")
 
@@ -125,7 +168,9 @@ class BlogViewTests(TestCase):
 
     @patch.object(views, "render_md", return_value="rendered-body")
     def test_post_detail_uses_slug_and_renders_body(self, render_md):
-        post = self.create_post("Detail Post", date(2025, 3, 1), body="**content**")
+        post = self.create_post(
+            "Detail Post", date(2025, 3, 1), body="**content**"
+        )
 
         request = self.factory.get(f"/post/{post.slug}/")
         capture = Mock(return_value=HttpResponse("ok"))
@@ -141,7 +186,9 @@ class BlogViewTests(TestCase):
         render_md.assert_called_once_with("**content**")
 
     def test_post_detail_returns_404_for_unpublished_post(self):
-        post = self.create_post("Draft Detail", date(2025, 3, 2), published=False)
+        post = self.create_post(
+            "Draft Detail", date(2025, 3, 2), published=False
+        )
 
         request = self.factory.get(f"/post/{post.slug}/")
 
@@ -149,6 +196,19 @@ class BlogViewTests(TestCase):
             views.post_detail(request, post.slug)
 
     def test_tags_list_returns_all_tags(self):
+        self.create_post(
+            "Published Django 1", date(2025, 4, 1), tags=[self.tag]
+        )
+        self.create_post(
+            "Published Django 2", date(2025, 4, 2), tags=[self.tag]
+        )
+        self.create_post(
+            "Published Python", date(2025, 4, 3), tags=[self.other_tag]
+        )
+        self.create_post(
+            "Draft Django", date(2025, 4, 4), published=False, tags=[self.tag]
+        )
+
         request = self.factory.get("/tags/")
         capture = Mock(return_value=HttpResponse("ok"))
 
@@ -157,7 +217,11 @@ class BlogViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(capture.call_args.args[1], "blog/tags.html")
-        self.assertCountEqual([tag.name for tag in capture.call_args.args[2]["tags"]], ["django", "python"])
+        tags = {
+            tag.name: tag.article_count
+            for tag in capture.call_args.args[2]["tags"]
+        }
+        self.assertEqual(tags, {"django": 2, "python": 1})
 
 
 class BlogModelAndFeedTests(TestCase):
@@ -170,11 +234,15 @@ class BlogModelAndFeedTests(TestCase):
             description="desc",
         )
 
-    def make_uploaded_image(self, *, size=(50, 50), color="red", name="image.png"):
+    def make_uploaded_image(
+        self, *, size=(50, 50), color="red", name="image.png"
+    ):
         buff = BytesIO()
         image = Image.new("RGB", size, color=color)
         image.save(buff, format="PNG")
-        return SimpleUploadedFile(name, buff.getvalue(), content_type="image/png")
+        return SimpleUploadedFile(
+            name, buff.getvalue(), content_type="image/png"
+        )
 
     def test_post_save_generates_slug_from_title(self):
         post = self.create_post("Hello Django World", date(2025, 4, 1))
@@ -193,7 +261,9 @@ class BlogModelAndFeedTests(TestCase):
 
     def test_media_file_save_rejects_non_image_uploads(self):
         post = self.create_post("With Upload", date(2025, 5, 1))
-        upload = SimpleUploadedFile("broken.txt", b"not-an-image", content_type="text/plain")
+        upload = SimpleUploadedFile(
+            "broken.txt", b"not-an-image", content_type="text/plain"
+        )
 
         with self.assertRaises(ValidationError):
             MediaFile(post=post, file=upload).save()

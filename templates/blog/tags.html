@@ -7,11 +7,10 @@
     {% if tags %}
     <ul>
         {% for tag in tags %}
-        <li><a class="link" href="{% url 'tagged_posts' tag.name %}">{{ tag.name }}</a></li>
+        <li><a class="link" href="{% url 'tagged_posts' tag.name %}">{{ tag.name }}</a> ({{ tag.article_count }})</li>
         {% endfor %}
     </ul>
     {% else %}
     <p>There are no Tags yet</p>
     {% endif %}
 {% endblock tags %}
-

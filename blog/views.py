@@ -1,4 +1,5 @@
 import markdown
+from django.db.models import Count, Q
 from django.core.paginator import Paginator
 from django.shortcuts import get_list_or_404, get_object_or_404, render
 
@@ -52,5 +53,7 @@ def post_detail(request, slug):
 
 
 def tags_list(request):
-    tags = Tag.objects.all()
+    tags = Tag.objects.annotate(
+        article_count=Count("post", filter=Q(post__published=True))
+    )
     return render(request, "blog/tags.html", {"tags": tags})
