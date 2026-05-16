@@ -93,14 +93,19 @@ jobs:
           GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
           GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
           IMAGE_REF: ${{ needs.build-and-push.outputs.image_ref }}
+          GIT_SHA: ${{ github.sha }}
         run: |
           ssh -p "$PROD_PORT" "$PROD_USER@$PROD_HOST" \
-            "export PROD_APP_DIR=$(printf '%q' "$PROD_APP_DIR") IMAGE_REF=$(printf '%q' "$IMAGE_REF") GHCR_USERNAME=$(printf '%q' "$GHCR_USERNAME") GHCR_TOKEN=$(printf '%q' "$GHCR_TOKEN"); bash -s" <<'EOF'
+            "export PROD_APP_DIR=$(printf '%q' "$PROD_APP_DIR") IMAGE_REF=$(printf '%q' "$IMAGE_REF") GHCR_USERNAME=$(printf '%q' "$GHCR_USERNAME") GHCR_TOKEN=$(printf '%q' "$GHCR_TOKEN") GIT_SHA=$(printf '%q' "$GIT_SHA"); bash -s" <<'EOF'
           set -euo pipefail
           cd "$PROD_APP_DIR"
+          git fetch --prune origin main
+          git checkout --force "$GIT_SHA"
           printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
           WEB_IMAGE="$IMAGE_REF" docker compose pull web
-          WEB_IMAGE="$IMAGE_REF" docker compose up -d web nginx
+          WEB_IMAGE="$IMAGE_REF" docker compose up -d --force-recreate web nginx
+          running_image="$(docker inspect --format '{{.Config.Image}}' mywebsite)"
+          test "$running_image" = "$IMAGE_REF"
           docker compose ps
           EOF
 

@@ -81,9 +81,11 @@ The deploy workflow:
 - builds the Docker image from `Dockerfile`
 - publishes `latest` and a commit SHA tag to `ghcr.io/idachser/idachser.blog`
 - SSHes into the production server
+- checks out the exact deployed commit in `PROD_APP_DIR`
 - logs into GHCR on the server
 - pulls the exact SHA-tagged image
-- restarts `web` and `nginx` with Docker Compose
+- force-recreates `web` and restarts `nginx` with Docker Compose
+- verifies the running `web` container uses the exact SHA-tagged image
 - runs a smoke check against `https://idachser.com/`
 
 ### Required GitHub Environment Secrets
