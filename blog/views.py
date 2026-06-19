@@ -22,21 +22,21 @@ def posts_list(request):
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    for post in posts:
+    for post in page_obj:
         post.description = render_md(post.description)
 
     return render(request, "blog/posts.html", {"posts": page_obj})
 
 
 def tagged_posts_list(request, tag_slug):
-    tag = get_object_or_404(Tag, name=tag_slug)
+    tag = get_object_or_404(Tag, slug=tag_slug)
     posts = get_list_or_404(Post, tags=tag, published=True)
     paginator = Paginator(posts, 5)
 
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    for post in posts:
+    for post in page_obj:
         post.description = render_md(post.description)
 
     context = {"tag": tag, "posts": page_obj}

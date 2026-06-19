@@ -21,7 +21,9 @@ if not SECRET_KEY:
     if DEBUG or RUNNING_TESTS:
         SECRET_KEY = "django-insecure-local-development-key"
     else:
-        raise ImproperlyConfigured("DJANGO_KEY must be set when DEBUG is False.")
+        raise ImproperlyConfigured(
+            "DJANGO_KEY must be set when DEBUG is False."
+        )
 
 if not DEBUG:
     CSRF_COOKIE_SECURE = True
@@ -36,7 +38,9 @@ if not DEBUG:
     SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
     SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
 
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost,web").split(",")
+ALLOWED_HOSTS = os.getenv(
+    "DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost,web"
+).split(",")
 CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
 
 ADMINS = [(os.getenv("ADMIN_NAME", ""), os.getenv("ADMIN_EMAIL"))]
@@ -57,7 +61,9 @@ INSTALLED_APPS = [
 ]
 
 if RUNNING_TESTS:
-    INSTALLED_APPS = [app for app in INSTALLED_APPS if app != "django.contrib.admin"]
+    INSTALLED_APPS = [
+        app for app in INSTALLED_APPS if app != "django.contrib.admin"
+    ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -178,8 +184,10 @@ LOGGING = {
         },
         "file": {
             "level": "ERROR",
-            "class": "logging.FileHandler",
+            "class": "logging.handlers.RotatingFileHandler",
             "filename": BASE_DIR / "site.log",
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 3,
         },
         "mail_admins": {
             "level": "ERROR",

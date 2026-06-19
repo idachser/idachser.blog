@@ -1,10 +1,13 @@
 import os
+import shutil
 from io import BytesIO
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.utils.text import slugify
 from PIL import Image
 
@@ -13,9 +16,15 @@ MAX_UPLOAD_PIXELS = 20_000_000
 
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=50, unique=True, blank=True)
 
     def __str__(self):
         return str(self.name)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name) or "tag"
+        super().save(*args, **kwargs)
 
 
 class Post(models.Model):
@@ -25,7 +34,9 @@ class Post(models.Model):
         "ru": "russian",
     }
     title = models.CharField(max_length=200, unique=True)
-    language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default="de")
+    language = models.CharField(
+        max_length=2, choices=LANGUAGE_CHOICES, default="de"
+    )
     description = models.TextField(max_length=500, blank=True)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     publish_date = models.DateField()
@@ -45,28 +56,18 @@ class Post(models.Model):
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
 
-    def delete(self, using=None, keep_parents=False):
-        for media in self.post_media.all():
-            media.delete()
-
-        post_media_dir = os.path.join(settings.MEDIA_ROOT, f"post_{self.id}", "media")
-        if os.path.exists(post_media_dir):
-            os.removedirs(post_media_dir)
-
-        return super().delete(using, keep_parents)
-
 
 def media_file_path(instance, filename) -> str:
     return f"post_{instance.post.id}/media/{filename}"
 
 
 class MediaFile(models.Model):
-    post = models.ForeignKey(Post, related_name="post_media", on_delete=models.CASCADE)
+    post = models.ForeignKey(
+        Post, related_name="post_media", on_delete=models.CASCADE
+    )
     file = models.FileField(upload_to=media_file_path, blank=True)
 
     def save(self, *args, **kwargs):
-        """compress file and save"""
-
         if not self.file:
             return super().save(*args, **kwargs)
 
@@ -77,13 +78,17 @@ class MediaFile(models.Model):
 
             self.file.seek(0)
             with Image.open(self.file) as uploaded_image:
+                if (
+                    uploaded_image.width * uploaded_image.height
+                    > MAX_UPLOAD_PIXELS
+                ):
+                    raise ValidationError("Image is too large.")
                 uploaded_image.load()
                 img = uploaded_image.copy()
         except (Image.DecompressionBombError, OSError) as exc:
-            raise ValidationError("Upload must be a valid, safe image.") from exc
-
-        if img.width * img.height > MAX_UPLOAD_PIXELS:
-            raise ValidationError("Image is too large.")
+            raise ValidationError(
+                "Upload must be a valid, safe image."
+            ) from exc
 
         if img.mode != "RGB":
             img = img.convert("RGB")
@@ -93,11 +98,23 @@ class MediaFile(models.Model):
 
         buff = BytesIO()
         img.save(buff, format="JPEG", optimize=True, quality=75)
-        self.file.save(self.file.name, ContentFile(buff.getvalue()), save=False)
+        base, _ = os.path.splitext(self.file.name)
+        self.file.save(f"{base}.jpg", ContentFile(buff.getvalue()), save=False)
         buff.close()
         super().save(*args, **kwargs)
 
-    def delete(self, using=None, keep_parents=False):
-        if self.file and os.path.isfile(self.file.path):
-            os.remove(self.file.path)
-        return super().delete(using, keep_parents)
+
+@receiver(post_delete, sender=MediaFile)
+def delete_media_file_on_disk(sender, instance, **kwargs):
+    if not instance.file:
+        return
+    try:
+        os.remove(instance.file.path)
+    except FileNotFoundError:
+        pass
+
+
+@receiver(post_delete, sender=Post)
+def cleanup_post_directory(sender, instance, **kwargs):
+    post_dir = os.path.join(settings.MEDIA_ROOT, f"post_{instance.pk}")
+    shutil.rmtree(post_dir, ignore_errors=True)

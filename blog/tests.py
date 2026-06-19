@@ -80,9 +80,9 @@ class BlogViewTests(TestCase):
             [post.title for post in page.object_list],
             [post.title for post in reversed(posts[1:])],
         )
-        render_md.assert_any_call("desc-1")
+        render_md.assert_any_call("desc-2")
         render_md.assert_any_call("desc-6")
-        self.assertEqual(render_md.call_count, 6)
+        self.assertEqual(render_md.call_count, 5)
 
     def test_posts_list_second_page_returns_remaining_post(self):
         for index in range(1, 7):
@@ -130,11 +130,11 @@ class BlogViewTests(TestCase):
             description="draft",
         )
 
-        request = self.factory.get(f"/tags/{self.tag.name}")
+        request = self.factory.get(f"/tags/{self.tag.slug}")
         capture = Mock(return_value=HttpResponse("ok"))
 
         with patch.object(views, "render", capture):
-            response = views.tagged_posts_list(request, self.tag.name)
+            response = views.tagged_posts_list(request, self.tag.slug)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(capture.call_args.args[1], "blog/posts.html")
@@ -147,6 +147,19 @@ class BlogViewTests(TestCase):
         render_md.assert_any_call("new-tagged")
         render_md.assert_any_call("old-tagged")
         self.assertEqual(render_md.call_count, 2)
+
+    def test_tagged_posts_reachable_by_generated_slug(self):
+        tag = Tag.objects.create(name="Data Science")
+        self.create_post("Tagged", date(2025, 6, 1), tags=[tag])
+
+        request = self.factory.get(f"/tags/{tag.slug}")
+        capture = Mock(return_value=HttpResponse("ok"))
+
+        with patch.object(views, "render", capture):
+            response = views.tagged_posts_list(request, tag.slug)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(capture.call_args.kwargs["context"]["tag"], tag)
 
     def test_tagged_posts_list_returns_404_for_missing_tag(self):
         request = self.factory.get("/tags/missing")
@@ -161,10 +174,10 @@ class BlogViewTests(TestCase):
             "Tagged Draft", date(2025, 2, 4), published=False, tags=[self.tag]
         )
 
-        request = self.factory.get(f"/tags/{self.tag.name}")
+        request = self.factory.get(f"/tags/{self.tag.slug}")
 
         with self.assertRaises(Http404):
-            views.tagged_posts_list(request, self.tag.name)
+            views.tagged_posts_list(request, self.tag.slug)
 
     @patch.object(views, "render_md", return_value="rendered-body")
     def test_post_detail_uses_slug_and_renders_body(self, render_md):
@@ -249,6 +262,11 @@ class BlogModelAndFeedTests(TestCase):
 
         self.assertEqual(post.slug, "hello-django-world")
 
+    def test_tag_save_generates_slug_from_name(self):
+        tag = Tag.objects.create(name="Machine Learning")
+
+        self.assertEqual(tag.slug, "machine-learning")
+
     def test_posts_feed_returns_only_published_posts_in_descending_order(self):
         older = self.create_post("Older", date(2025, 1, 1), published=True)
         newest = self.create_post("Newest", date(2025, 1, 3), published=True)
@@ -277,7 +295,7 @@ class BlogModelAndFeedTests(TestCase):
                 media.save()
                 saved_path = media.file.path
 
-                self.assertTrue(saved_path.endswith("image.png"))
+                self.assertTrue(saved_path.endswith("image.jpg"))
                 with Image.open(saved_path) as saved_image:
                     self.assertEqual(saved_image.format, "JPEG")
 
