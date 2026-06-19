@@ -10,8 +10,8 @@ Django 5.2 personal blog (`idachser.blog`) deployed at https://idachser.com/. Us
 
 ```bash
 # Dependencies
-uv sync                        # install deps
-uv sync --group dev            # include dev tools (ruff)
+uv sync --locked               # install deps
+uv sync --locked --group dev  # include dev tools (ruff)
 
 # Local dev (native)
 export PGSERVICEFILE="$(pwd)/.pg_service.conf"
@@ -31,6 +31,7 @@ uv run ruff check --fix <file_path>
 # Local Docker stack
 docker compose -f docker-compose-test.yaml up --build -d
 docker compose -f docker-compose-test.yaml exec web uv run manage.py migrate
+docker compose -f docker-compose-test.yaml exec web uv run manage.py createsuperuser
 docker compose -f docker-compose-test.yaml down
 ```
 
@@ -48,7 +49,7 @@ docker compose -f docker-compose-test.yaml down
 
 **Post model key fields:** title, slug, body (Markdown), publish_date, language (EN/DE/RU), tags (M2M), media (M2M via `PostMedia`). Markdown rendering supports syntax highlighting (Pygments) and math (mdx_math + MathJax). `PostMedia` compresses images to ≤20 MP on save.
 
-**Production stack (docker-compose.yaml):** `init-perms` → `web` (Gunicorn) + `db` (PostgreSQL 17) + `nginx` + `certbot`. Image built by CI and pushed to GHCR (`ghcr.io/idachser/idachser.blog`). Deploy SSH-pulls the SHA-tagged image and force-recreates containers.
+**Production stack (docker-compose.yaml):** `(init-perms + db)` → `web` (Gunicorn) → `nginx`; `certbot` runs independently. Image built by CI and pushed to GHCR (`ghcr.io/idachser/idachser.blog`). Deploy SSH-pulls the SHA-tagged image and force-recreates only `web` and `nginx` (not `db` or `certbot`).
 
 ## Coding Conventions
 
@@ -56,13 +57,15 @@ docker compose -f docker-compose-test.yaml down
 - Keep views thin; push domain logic to models or small helper functions
 - Always run `ruff format` and `ruff check --fix` on every Python file you write or modify before moving on
 - Line length: 80 chars; double quotes; E501 ignored in ruff config
-- Tests use `django.test.TestCase`; name methods `test_<behavior>`; co-locate with their app (`blog/tests.py`, `pages/tests.py`)
-- Commit style: Conventional Commits — `feat(scope): ...`, `fix(scope): ...`, `chore(scope): ...`
+- Tests use `django.test.TestCase`; name methods `test_<behavior>`; co-locate with their app (`blog/tests.py`, `pages/tests.py`); add focused tests for model behavior, routing, and view access control whenever those areas change
+- Commit style: Conventional Commits — `feat(scope): ...`, `fix(scope): ...`, `chore(scope): ...`; bare prefix without scope (`feat: ...`, `test: ...`) is also valid
 - Do not add comments describing changes, history, or progress — only describe current state and purpose
 
 ## Important Notes
 
 - `docker compose down -v` destroys database volumes — treat as destructive
+- Never commit `.env`, `.website_pgpass`, or any credential file — keep them out of git history
 - Changes to `website/settings.py`, admin URL exposure, or unpublished post access affect production security — review carefully
 - After adding significant functionality, update README.md
 - Tests must pass before marking a task complete: run → fix → re-run until green
+- PRs should state scope, deployment impact, and any required env/secret changes; include screenshots for template or styling changes
