@@ -24,7 +24,8 @@ uv run manage.py test              # full suite
 uv run manage.py test blog.tests   # single app
 uv run manage.py check             # Django system checks
 
-# Linting (run after every Python file edit)
+# Linting (run only on files you wrote/edited — pass explicit paths,
+# never whole directories; do NOT lint migrations or other generated files)
 uv run ruff format <file_path>
 uv run ruff check --fix <file_path>
 
@@ -55,7 +56,7 @@ docker compose -f docker-compose-test.yaml down
 
 - 4-space indent, `snake_case` for functions/variables, `PascalCase` for models and admin classes
 - Keep views thin; push domain logic to models or small helper functions
-- Always run `ruff format` and `ruff check --fix` on every Python file you write or modify before moving on
+- Always run `ruff format` and `ruff check --fix` on every Python file you write or modify before moving on — but pass explicit file paths only, never whole directories, and never reformat migrations or other files you did not change
 - Line length: 80 chars; double quotes; E501 ignored in ruff config
 - Tests use `django.test.TestCase`; name methods `test_<behavior>`; co-locate with their app (`blog/tests.py`, `pages/tests.py`); add focused tests for model behavior, routing, and view access control whenever those areas change
 - Commit style: Conventional Commits — `feat(scope): ...`, `fix(scope): ...`, `chore(scope): ...`; bare prefix without scope (`feat: ...`, `test: ...`) is also valid

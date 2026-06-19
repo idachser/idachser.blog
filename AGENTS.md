@@ -43,6 +43,7 @@ For each task:
 - Match existing template naming: app templates live under `templates/<app>/`
 - No formatter or linter is configured in this repository; keep changes minimal, readable, and consistent with surrounding code
 - Always format and check Python files with ruff immediately after writing or editing them: `uv run ruff format <file_path>` and `uv run ruff check --fix <file_path>`. Do this for every Python file you create or modify, before moving on to the next step
+- Pass explicit file paths to ruff — only the files you actually changed. Never run ruff on whole directories, and never reformat migrations or other generated/untouched files, so the diff stays focused
 
 ## Testing Requirements
 - Use Django’s built-in test framework via `django.test.TestCase`
