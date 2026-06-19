@@ -18,7 +18,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="tag",
             name="slug",
-            field=models.SlugField(blank=True, default="", max_length=50),
+            field=models.SlugField(
+                blank=True, default="", max_length=50, db_index=False
+            ),
         ),
         migrations.RunPython(populate_tag_slugs, migrations.RunPython.noop),
         migrations.AlterField(
