@@ -6,12 +6,13 @@ services:
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/uploads
+      - log_volume:/app/logs
     restart: "no"
     command: >
       sh -lc "
         set -e;
-        mkdir -p /app/staticfiles /app/uploads;
-        chown -R 1000:1000 /app/staticfiles /app/uploads
+        mkdir -p /app/staticfiles /app/uploads /app/logs;
+        chown -R 1000:1000 /app/staticfiles /app/uploads /app/logs
       "
 
   web:
@@ -30,6 +31,7 @@ services:
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/uploads
+      - log_volume:/app/logs
       - ./.pg_service.conf:/home/appuser/.pg_service.conf:ro
       - ./.website_pgpass:/home/appuser/.website_pgpass:ro
     restart: unless-stopped
@@ -84,6 +86,7 @@ volumes:
   postgres_data:
   static_volume:
   media_volume:
+  log_volume:
 
 networks:
   default:

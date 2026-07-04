@@ -11,11 +11,21 @@ RUNNING_TESTS = "test" in sys.argv
 
 load_dotenv()
 
+
+def env_bool(name, default=False):
+    return os.getenv(name, str(default)).strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
+DEBUG = env_bool("DJANGO_DEBUG")
 
 if not SECRET_KEY:
     if DEBUG or RUNNING_TESTS:
@@ -43,16 +53,27 @@ ALLOWED_HOSTS = os.getenv(
 ).split(",")
 CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
 
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
-ADMINS = [(os.getenv("ADMIN_NAME", ""), ADMIN_EMAIL)] if ADMIN_EMAIL else []
+ADMIN_NAME = os.getenv("ADMIN_NAME", "")
+ADMINS = [
+    (ADMIN_NAME, address.strip())
+    for address in os.getenv("ADMIN_EMAIL", "").split(",")
+    if address.strip()
+]
 
 EMAIL_HOST = os.getenv("EMAIL_HOST", "")
-EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_PORT = int(os.getenv("EMAIL_PORT") or "587")
+EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT") or "10")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
-EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
+EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", default=True)
 SERVER_EMAIL = os.getenv("SERVER_EMAIL", EMAIL_HOST_USER or "root@localhost")
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
+
+if not DEBUG and not RUNNING_TESTS and bool(EMAIL_HOST) != bool(ADMINS):
+    raise ImproperlyConfigured(
+        "EMAIL_HOST and ADMIN_EMAIL must be set together (or both unset) "
+        "to enable admin error emails."
+    )
 
 ADMIN_URL = os.getenv("ADMIN_URL", "admin/")
 
@@ -166,6 +187,9 @@ MEDIA_URL = "media/"
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -194,7 +218,7 @@ LOGGING = {
         "file": {
             "level": "ERROR",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": BASE_DIR / "site.log",
+            "filename": LOG_DIR / "site.log",
             "maxBytes": 5 * 1024 * 1024,
             "backupCount": 3,
         },
