@@ -43,7 +43,16 @@ ALLOWED_HOSTS = os.getenv(
 ).split(",")
 CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
 
-ADMINS = [(os.getenv("ADMIN_NAME", ""), os.getenv("ADMIN_EMAIL"))]
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+ADMINS = [(os.getenv("ADMIN_NAME", ""), ADMIN_EMAIL)] if ADMIN_EMAIL else []
+
+EMAIL_HOST = os.getenv("EMAIL_HOST", "")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
+SERVER_EMAIL = os.getenv("SERVER_EMAIL", EMAIL_HOST_USER or "root@localhost")
+DEFAULT_FROM_EMAIL = SERVER_EMAIL
 
 ADMIN_URL = os.getenv("ADMIN_URL", "admin/")
 
@@ -196,7 +205,9 @@ LOGGING = {
     },
     "loggers": {
         "django": {
-            "handlers": ["file", "mail_admins"],
+            "handlers": (
+                ["file", "mail_admins"] if EMAIL_HOST and ADMINS else ["file"]
+            ),
             "level": "ERROR",
             "propagate": True,
         },
