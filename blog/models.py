@@ -71,6 +71,16 @@ class MediaFile(models.Model):
         if not self.file:
             return super().save(*args, **kwargs)
 
+        previous_name = None
+        if self.pk:
+            previous_name = (
+                MediaFile.objects.filter(pk=self.pk)
+                .values_list("file", flat=True)
+                .first()
+            )
+            if previous_name == self.file.name:
+                return super().save(*args, **kwargs)
+
         try:
             self.file.seek(0)
             with Image.open(self.file) as uploaded_image:
@@ -102,6 +112,8 @@ class MediaFile(models.Model):
         self.file.save(f"{base}.jpg", ContentFile(buff.getvalue()), save=False)
         buff.close()
         super().save(*args, **kwargs)
+        if previous_name and previous_name != self.file.name:
+            self.file.storage.delete(previous_name)
 
 
 @receiver(post_delete, sender=MediaFile)

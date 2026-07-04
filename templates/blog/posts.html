@@ -24,7 +24,7 @@
     {% endfor %}
 
     {% block pagination %}
-    {% if posts.count > 1 %}
+    {% if posts.has_other_pages %}
         <div class="pagination">
             {% if posts.has_previous %}
                 <a href="?page={{ posts.previous_page_number }}">&lt;&lt;</a>

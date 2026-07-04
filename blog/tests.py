@@ -84,6 +84,21 @@ class BlogViewTests(TestCase):
         render_md.assert_any_call("desc-6")
         self.assertEqual(render_md.call_count, 5)
 
+    def test_posts_list_renders_pagination_controls_with_multiple_pages(self):
+        for index in range(1, 7):
+            self.create_post(f"Post {index}", date(2025, 1, index))
+
+        response = self.client.get("/")
+
+        self.assertContains(response, "?page=2")
+
+    def test_posts_list_hides_pagination_controls_with_single_page(self):
+        self.create_post("Only Post", date(2025, 1, 1))
+
+        response = self.client.get("/")
+
+        self.assertNotContains(response, "?page=")
+
     def test_posts_list_second_page_returns_remaining_post(self):
         for index in range(1, 7):
             self.create_post(f"Post {index}", date(2025, 1, index))
@@ -277,6 +292,26 @@ class BlogModelAndFeedTests(TestCase):
 
         self.assertEqual(items, [newest, middle, older])
 
+    def test_posts_feed_renders_markdown_descriptions(self):
+        post = Post.objects.create(
+            title="Feed Post",
+            publish_date=date(2025, 1, 5),
+            published=True,
+            body="body",
+            description="**bold** desc",
+        )
+
+        description = PostsFeed().item_description(post)
+
+        self.assertIn("<strong>bold</strong>", description)
+
+    def test_posts_feed_includes_item_author(self):
+        self.create_post("Authored", date(2025, 1, 6))
+
+        response = self.client.get("/rss/")
+
+        self.assertContains(response, "Ingvar Dachser")
+
     def test_media_file_save_rejects_non_image_uploads(self):
         post = self.create_post("With Upload", date(2025, 5, 1))
         upload = SimpleUploadedFile(
@@ -285,6 +320,36 @@ class BlogModelAndFeedTests(TestCase):
 
         with self.assertRaises(ValidationError):
             MediaFile(post=post, file=upload).save()
+
+    def test_media_file_resave_without_new_upload_keeps_single_file(self):
+        post = self.create_post("With Media Resave", date(2025, 5, 3))
+
+        with TemporaryDirectory() as media_root:
+            with self.settings(MEDIA_ROOT=media_root):
+                media = MediaFile(post=post, file=self.make_uploaded_image())
+                media.save()
+                saved_name = media.file.name
+
+                media.save()
+
+                self.assertEqual(media.file.name, saved_name)
+                media_dir = os.path.dirname(media.file.path)
+                self.assertEqual(os.listdir(media_dir), ["image.jpg"])
+
+    def test_media_file_replacing_upload_removes_previous_file(self):
+        post = self.create_post("With Replaced Media", date(2025, 5, 4))
+
+        with TemporaryDirectory() as media_root:
+            with self.settings(MEDIA_ROOT=media_root):
+                media = MediaFile(post=post, file=self.make_uploaded_image())
+                media.save()
+                old_path = media.file.path
+
+                media.file = self.make_uploaded_image(name="other.png")
+                media.save()
+
+                self.assertFalse(os.path.exists(old_path))
+                self.assertTrue(media.file.name.endswith("other.jpg"))
 
     def test_post_delete_removes_saved_media_file(self):
         post = self.create_post("With Media", date(2025, 5, 2))
