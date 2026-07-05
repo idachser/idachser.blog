@@ -235,5 +235,10 @@ LOGGING = {
             "level": "ERROR",
             "propagate": True,
         },
+        "django.security.DisallowedHost": {
+            "handlers": ["file"],
+            "level": "ERROR",
+            "propagate": False,
+        },
     },
 }
