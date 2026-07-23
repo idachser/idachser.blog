@@ -15,6 +15,7 @@ wheels/
 secrets/
 uploads/
 staticfiles/
+backups/
 docker-compose-test.yaml
 
 *.log
