@@ -21,6 +21,16 @@ def env_bool(name, default=False):
     }
 
 
+def resolve_admin_url(value, allow_default):
+    """Normalize the admin path, requiring an explicit one in production."""
+    path = (value or "").strip().strip("/")
+    if not path:
+        if allow_default:
+            return "admin/"
+        raise ImproperlyConfigured("ADMIN_URL must be set when DEBUG is False.")
+    return f"{path}/"
+
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_KEY")
 
@@ -75,7 +85,7 @@ if not DEBUG and not RUNNING_TESTS and bool(EMAIL_HOST) != bool(ADMINS):
         "to enable admin error emails."
     )
 
-ADMIN_URL = os.getenv("ADMIN_URL", "admin/")
+ADMIN_URL = resolve_admin_url(os.getenv("ADMIN_URL"), DEBUG or RUNNING_TESTS)
 
 # Application definition
 INSTALLED_APPS = [

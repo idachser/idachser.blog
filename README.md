@@ -57,7 +57,8 @@ All runtime configuration lives in `.env` in the project root:
 - `DJANGO_KEY` — secret key, required when `DJANGO_DEBUG` is off
 - `DJANGO_DEBUG` — `True`/`False`, defaults to `False`
 - `DJANGO_ALLOWED_HOSTS` — comma-separated, defaults to `127.0.0.1,localhost,web`
-- `ADMIN_URL` — admin path, defaults to `admin/`
+- `ADMIN_URL` — admin path, required when `DJANGO_DEBUG` is off; defaults to
+  `admin/` only for local development and tests
 - `POSTGRES_USER`, `POSTGRES_DB` — consumed by the `db` container
 - `PASSFILE` — path to the Postgres passfile
 
