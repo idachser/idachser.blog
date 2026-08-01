@@ -58,7 +58,9 @@ All runtime configuration lives in `.env` in the project root:
 - `DJANGO_DEBUG` — `True`/`False`, defaults to `False`
 - `DJANGO_ALLOWED_HOSTS` — comma-separated, defaults to `127.0.0.1,localhost,web`
 - `ADMIN_URL` — admin path, required when `DJANGO_DEBUG` is off; defaults to
-  `admin/` only for local development and tests
+  `admin/` only for local development and tests. Must end with a trailing
+  slash — nginx renders it into its config as `location /${ADMIN_URL}`, so a
+  missing slash leaves the prefix guard misaligned with Django's route
 - `POSTGRES_USER`, `POSTGRES_DB` — consumed by the `db` container
 - `PASSFILE` — path to the Postgres passfile
 
@@ -73,6 +75,26 @@ Admin error emails — `EMAIL_HOST` and `ADMIN_EMAIL` must be set together
 
 Independently of email, errors are written to `logs/site.log`, which sits on
 a Docker volume and survives deploys.
+
+## Admin Protection
+
+The admin sits behind two nginx layers before any request reaches Django:
+
+- HTTP basic auth (`nginx/.htpasswd`, gitignored, never committed)
+- a per-IP rate limit of 30 req/min with a burst of 20, answering `429`
+
+Because `nginx/default.conf.template` is versioned but the admin path is not,
+nginx renders its config at container start: the official image runs `envsubst`
+over `/etc/nginx/templates/*.template`, substituting only `ADMIN_URL`
+(`NGINX_ENVSUBST_FILTER`) so nginx's own `$variables` survive untouched. The
+path therefore stays in `.env` and out of git. Compose fails fast if `ADMIN_URL`
+is unset, matching Django's own production guard.
+
+Create the password file on the server (`apache2-utils` / `httpd-tools`):
+
+```bash
+htpasswd -B -c nginx/.htpasswd <username>
+```
 
 ## Tests & Linting
 
@@ -112,5 +134,6 @@ On the server:
 - clone this repository into the path that will be stored in `PROD_APP_DIR`
 - place `.env`, `.pg_service.conf`, and `.website_pgpass` in the project root
 - create `secrets/db_password` containing the Postgres password
+- create `nginx/.htpasswd` with `htpasswd -B -c nginx/.htpasswd <username>`
 - install Docker Compose and verify the server user can run `docker compose`
 - verify GHCR pull access works with the credentials stored in GitHub

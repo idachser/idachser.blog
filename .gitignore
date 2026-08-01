@@ -12,6 +12,7 @@ wheels/
 
 .pg_service.conf
 .website_pgpass
+nginx/.htpasswd
 secrets/
 uploads/
 staticfiles/
