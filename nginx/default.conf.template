@@ -25,6 +25,8 @@ map $request_uri $bad_request {
     "~*[?&]rest_route="                                      1;
 }
 
+limit_req_zone $binary_remote_addr zone=admin:10m rate=30r/m;
+
 server {
     listen 80 default_server;
     server_name _;
@@ -76,6 +78,20 @@ server {
 
     location /media/ {
         alias /app/uploads/;
+    }
+
+    location /${ADMIN_URL} {
+        auth_basic "restricted";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+
+        limit_req zone=admin burst=20 nodelay;
+        limit_req_status 429;
+
+        proxy_pass http://web:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     location / {
