@@ -76,6 +76,16 @@ Admin error emails — `EMAIL_HOST` and `ADMIN_EMAIL` must be set together
 Independently of email, errors are written to `logs/site.log`, which sits on
 a Docker volume and survives deploys.
 
+nginx writes a JSON access log to `logs/nginx/access.json.log` on the host.
+Two upstream fields separate who produced a response, which is what alerting
+rules need to key on:
+
+| Response | `status` | `upstream_status` | `upstream_connect` |
+| --- | --- | --- | --- |
+| nginx answered alone (static, 444, 401, 429) | any | empty | empty |
+| Gunicorn unreachable | 502 | 502 | `-` |
+| the application returned an error | 500 | 500 | a duration |
+
 ## Admin Protection
 
 The admin sits behind two nginx layers before any request reaches Django:
@@ -112,6 +122,13 @@ it to GHCR (`latest` + commit SHA tags), then deploys over SSH: the server
 checks out the deployed commit, pulls the SHA-tagged image, force-recreates
 `web` and `nginx`, and the workflow smoke-checks https://idachser.com/.
 Details live in `.github/workflows/ci.yml` and `deploy.yml`.
+
+`web` runs `migrate` and `collectstatic` before Gunicorn binds port 8000, so
+for a while after the container starts nginx is up and the application is not.
+A TCP healthcheck on `web` reports when Gunicorn is actually listening, and
+`docker compose up --wait` holds the deploy step until then — so the smoke
+test no longer fires into that window, and a container that never comes up
+fails the deploy with its own logs instead of surfacing as a 502.
 
 ### Required GitHub Environment Secrets
 

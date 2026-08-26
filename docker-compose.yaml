@@ -35,6 +35,20 @@ services:
       - ./.pg_service.conf:/home/appuser/.pg_service.conf:ro
       - ./.website_pgpass:/home/appuser/.website_pgpass:ro
     restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - |
+          import socket, sys
+          s = socket.socket()
+          s.settimeout(2)
+          sys.exit(s.connect_ex(("127.0.0.1", 8000)))
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 30s
     command: >
       sh -c "
         uv run manage.py migrate &&
