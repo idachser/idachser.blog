@@ -103,7 +103,8 @@ jobs:
           git checkout --force "$GIT_SHA"
           printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
           WEB_IMAGE="$IMAGE_REF" docker compose pull web
-          WEB_IMAGE="$IMAGE_REF" docker compose up -d --force-recreate web nginx
+          WEB_IMAGE="$IMAGE_REF" docker compose up -d --force-recreate --wait web nginx \
+            || { docker compose ps; docker compose logs --tail=50 web; exit 1; }
           running_image="$(docker inspect --format '{{.Config.Image}}' mywebsite)"
           test "$running_image" = "$IMAGE_REF"
           docker compose ps
