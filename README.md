@@ -9,6 +9,8 @@ It has:
 - RSS ('/rss/')
 - media uploads (with image compression)
 - error alerting via admin emails
+- draft preview: the **Preview** button on a post's admin page renders it
+  with the site template before it is published (staff only)
 
 ## Stack
 

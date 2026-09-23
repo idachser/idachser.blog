@@ -4,10 +4,17 @@ from io import BytesIO
 from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import Http404, HttpResponse
-from django.test import RequestFactory, TestCase
+from django.test import (
+    RequestFactory,
+    TestCase,
+    modify_settings,
+    override_settings,
+)
+from django.urls import reverse
 from PIL import Image
 
 from rss.feeds import PostsFeed
@@ -367,3 +374,94 @@ class BlogModelAndFeedTests(TestCase):
                 post.delete()
 
                 self.assertFalse(os.path.exists(saved_path))
+
+
+@modify_settings(INSTALLED_APPS={"append": "django.contrib.admin"})
+@override_settings(ROOT_URLCONF="website.urls")
+class PostPreviewAdminTests(TestCase):
+    def setUp(self):
+        self.post = Post.objects.create(
+            title="Draft",
+            publish_date=date(2025, 5, 1),
+            published=False,
+            body="**bold draft**",
+        )
+        self.preview_url = reverse(
+            "admin:blog_post_preview", args=[self.post.pk]
+        )
+        self.admin_user = get_user_model().objects.create_superuser(
+            "admin", "admin@example.com", "password"
+        )
+
+    def test_preview_renders_unpublished_post_for_staff(self):
+        self.client.force_login(self.admin_user)
+
+        response = self.client.get(self.preview_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "blog/post_detail.html")
+        self.assertContains(response, "<strong>bold draft</strong>", html=True)
+        self.assertContains(response, "Preview — not published")
+        self.assertEqual(response["X-Robots-Tag"], "noindex, nofollow")
+
+    def test_preview_of_published_post_omits_not_published_note(self):
+        self.post.published = True
+        self.post.save()
+        self.client.force_login(self.admin_user)
+
+        response = self.client.get(self.preview_url)
+
+        self.assertContains(response, "Preview")
+        self.assertNotContains(response, "not published")
+
+    def test_preview_redirects_anonymous_user_to_login(self):
+        response = self.client.get(self.preview_url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("admin:login"), response["Location"])
+
+    def test_preview_redirects_non_staff_user_to_login(self):
+        user = get_user_model().objects.create_user("reader", password="pw")
+        self.client.force_login(user)
+
+        response = self.client.get(self.preview_url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("admin:login"), response["Location"])
+
+    def test_preview_forbidden_for_staff_without_view_permission(self):
+        user = get_user_model().objects.create_user(
+            "staff", password="pw", is_staff=True
+        )
+        self.client.force_login(user)
+
+        response = self.client.get(self.preview_url)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_preview_returns_404_for_missing_post(self):
+        self.client.force_login(self.admin_user)
+
+        response = self.client.get(
+            reverse("admin:blog_post_preview", args=[self.post.pk + 100])
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_change_form_links_to_preview(self):
+        self.client.force_login(self.admin_user)
+
+        change = self.client.get(
+            reverse("admin:blog_post_change", args=[self.post.pk])
+        )
+        add = self.client.get(reverse("admin:blog_post_add"))
+
+        self.assertContains(change, self.preview_url)
+        self.assertNotContains(add, "/preview/")
+
+    def test_public_detail_still_hides_draft(self):
+        response = self.client.get(
+            reverse("post_detail", args=[self.post.slug])
+        )
+
+        self.assertEqual(response.status_code, 404)

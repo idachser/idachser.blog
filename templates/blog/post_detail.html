@@ -6,6 +6,9 @@
 {% block page_title %}<h1>{{ post.title }}</h1>{% endblock page_title %}
 
 {% block post %}
+{% if is_preview %}
+<p class="preview-banner">Preview{% if not post.published %} — not published{% endif %}</p>
+{% endif %}
 <div class="pub">
     <p>{{ post.publish_date }}</p>
     {% if post.tags.all %}

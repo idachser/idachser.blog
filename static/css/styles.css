@@ -199,6 +199,12 @@ blockquote {
     color: var(--links-color);
 }
 
+.preview-banner {
+    padding: 0.5em 1em;
+    border: 1px dashed currentColor;
+    font-weight: bold;
+}
+
 .pub {
     display: flex;
     justify-content: flex-start;
