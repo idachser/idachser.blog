@@ -7,4 +7,5 @@ urlpatterns = [
     path("tags/", views.tags_list, name="tags"),
     path("tags/<slug:tag_slug>", views.tagged_posts_list, name="tagged_posts"),
     path("post/<str:slug>/", views.post_detail, name="post_detail"),
+    path("post/<str:slug>/vote/", views.vote, name="post_vote"),
 ]

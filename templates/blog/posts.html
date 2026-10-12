@@ -5,8 +5,9 @@
 {% if posts %}
     {% for post in posts %}
     <article class="card">
-    <h3 class="article-title">
+    <h3 class="article-title title-row">
         <a class="article-name" href="{% url 'post_detail' post.slug %}">{{ post.title }}</a>
+        {% include "blog/score.html" with score=post.score %}
     </h3>
     <div class="pub">
         <p>{{ post.publish_date }}</p>

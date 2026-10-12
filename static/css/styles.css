@@ -13,6 +13,9 @@
     --links-color: #ff6f06;
     --links-color-dark: #06ad28;
     --codeblock-bg-color-dark: #252525;
+    --score-pos: #1a8a2e;
+    --score-neg: #CF0000;
+    --score-zero: #7a7a7a;
 }
 
 /* Common styles */
@@ -182,6 +185,72 @@ blockquote {
 
 .article-title {
     margin-bottom: 0;
+}
+
+/* Voting */
+.title-row {
+    display: flex;
+    align-items: baseline;
+}
+
+.title-row::before {
+    white-space: pre;
+}
+
+.score {
+    margin-left: auto;
+    padding-left: 1rem;
+    flex-shrink: 0;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.score--pos {
+    color: var(--score-pos);
+}
+
+.score--neg {
+    color: var(--score-neg);
+}
+
+.score--zero {
+    color: var(--score-zero);
+}
+
+.vote {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 2rem;
+}
+
+.vote .score {
+    margin-left: 0;
+    padding-left: 0;
+    min-width: 3ch;
+    text-align: center;
+}
+
+.vote-btn {
+    font-family: var(--font-family);
+    font-size: 1.2rem;
+    font-weight: bold;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    cursor: pointer;
+    color: inherit;
+    background: none;
+    border: 2px solid var(--secondary-text-light);
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.vote-btn:hover,
+.vote-btn.is-active {
+    color: var(--links-color);
+    border-color: var(--links-color);
 }
 
 .article-name {
@@ -388,6 +457,12 @@ html.dark a:hover {
 
 html.dark a::after {
     filter: invert(0.8);
+}
+
+html.dark {
+    --score-pos: #3fbf55;
+    --score-neg: #ff4d4d;
+    --score-zero: #8a8a8a;
 }
 
 html.dark .link {

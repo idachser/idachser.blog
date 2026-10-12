@@ -5,7 +5,9 @@ from io import BytesIO
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from django.db import models
+from django.db import IntegrityError, models, transaction
+from django.db.models import OuterRef, Subquery, Sum, Value
+from django.db.models.functions import Coalesce
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils.text import slugify
@@ -55,6 +57,78 @@ class Post(models.Model):
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
+
+
+def with_score(queryset):
+    # A subquery instead of Sum("votes__value") keeps the total correct when
+    # the queryset is also joined through tags.
+    votes_total = (
+        PostVote.objects.filter(post=OuterRef("pk"))
+        .order_by()
+        .values("post")
+        .annotate(total=Sum("value"))
+        .values("total")
+    )
+    return queryset.annotate(
+        score=Coalesce(
+            Subquery(votes_total, output_field=models.IntegerField()),
+            Value(0),
+        )
+    )
+
+
+class PostVote(models.Model):
+    UP = 1
+    DOWN = -1
+
+    post = models.ForeignKey(
+        Post, related_name="votes", on_delete=models.CASCADE
+    )
+    voter_id = models.CharField(max_length=36)
+    ip_hash = models.CharField(max_length=64)
+    value = models.SmallIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["post", "voter_id"], name="unique_vote_per_voter"
+            ),
+            models.UniqueConstraint(
+                fields=["post", "ip_hash"], name="unique_vote_per_ip"
+            ),
+            models.CheckConstraint(
+                condition=models.Q(value__in=[1, -1]),
+                name="vote_value_is_up_or_down",
+            ),
+        ]
+
+    @classmethod
+    def toggle(cls, post, voter_id, ip_hash, value):
+        try:
+            return cls._toggle(post, voter_id, ip_hash, value)
+        except IntegrityError:
+            return cls._toggle(post, voter_id, ip_hash, value)
+
+    @classmethod
+    def _toggle(cls, post, voter_id, ip_hash, value):
+        with transaction.atomic():
+            votes = cls.objects.select_for_update().filter(post=post)
+            vote = (
+                votes.filter(voter_id=voter_id).first()
+                or votes.filter(ip_hash=ip_hash).first()
+            )
+            if vote is None:
+                cls.objects.create(
+                    post=post, voter_id=voter_id, ip_hash=ip_hash, value=value
+                )
+                return value
+            if vote.value == value:
+                vote.delete()
+                return None
+            vote.value = value
+            vote.save(update_fields=["value"])
+            return value
 
 
 def media_file_path(instance, filename) -> str:

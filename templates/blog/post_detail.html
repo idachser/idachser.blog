@@ -3,7 +3,12 @@
 
 
 {% block title %}{{ post.title }}{% endblock title %}
-{% block page_title %}<h1>{{ post.title }}</h1>{% endblock page_title %}
+{% block page_title %}
+<h1 class="title-row">
+    <span>{{ post.title }}</span>
+    {% if not is_preview %}{% include "blog/score.html" with score=post.score %}{% endif %}
+</h1>
+{% endblock page_title %}
 
 {% block post %}
 {% if is_preview %}
@@ -28,6 +33,15 @@
     {% if not forloop.last %}, {% endif %}
     {% endfor %}
 </div>
+{% endif %}
+{% if not is_preview %}
+<form id="vote" class="vote" method="post" action="{% url 'post_vote' post.slug %}">
+    {% csrf_token %}
+    <button type="submit" name="value" value="1" class="vote-btn{% if user_vote == 1 %} is-active{% endif %}" aria-label="Upvote">+</button>
+    {% include "blog/score.html" with score=post.score %}
+    <button type="submit" name="value" value="-1" class="vote-btn{% if user_vote == -1 %} is-active{% endif %}" aria-label="Downvote">&minus;</button>
+</form>
+<script src="{% static 'js/vote.js' %}" defer></script>
 {% endif %}
 {% include "../lightbox.html" %}
 {% endblock post %}

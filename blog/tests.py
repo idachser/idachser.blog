@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import Http404, HttpResponse
 from django.test import (
+    Client,
     RequestFactory,
     TestCase,
     modify_settings,
@@ -19,7 +20,8 @@ from PIL import Image
 
 from rss.feeds import PostsFeed
 
-from .models import MediaFile, Post, Tag
+from .models import MediaFile, Post, PostVote, Tag
+from .templatetags.blog_extras import score_class, signed_score
 from . import views
 
 
@@ -414,6 +416,14 @@ class PostPreviewAdminTests(TestCase):
         self.assertContains(response, "Preview")
         self.assertNotContains(response, "not published")
 
+    def test_preview_hides_voting(self):
+        self.client.force_login(self.admin_user)
+
+        response = self.client.get(self.preview_url)
+
+        self.assertNotContains(response, 'id="vote"')
+        self.assertNotContains(response, "data-score")
+
     def test_preview_redirects_anonymous_user_to_login(self):
         response = self.client.get(self.preview_url)
 
@@ -465,3 +475,160 @@ class PostPreviewAdminTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 404)
+
+
+class PostVoteTests(TestCase):
+    def setUp(self):
+        self.post = Post.objects.create(
+            title="Votable",
+            publish_date=date(2025, 7, 1),
+            published=True,
+            body="body",
+        )
+        self.url = reverse("post_vote", args=[self.post.slug])
+
+    def vote(self, value, *, client=None, ip="10.0.0.1", json=True):
+        client = client or self.client
+        headers = {"Accept": "application/json"} if json else {}
+        return client.post(
+            self.url, {"value": value}, REMOTE_ADDR=ip, headers=headers
+        )
+
+    def score(self):
+        return sum(v.value for v in PostVote.objects.filter(post=self.post))
+
+    def test_get_is_not_allowed(self):
+        self.assertEqual(self.client.get(self.url).status_code, 405)
+
+    def test_unpublished_post_returns_404(self):
+        draft = Post.objects.create(
+            title="Draft", publish_date=date(2025, 7, 2), body="b"
+        )
+        response = self.client.post(
+            reverse("post_vote", args=[draft.slug]), {"value": "1"}
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_invalid_value_returns_400(self):
+        for value in ["2", "0", "abc", ""]:
+            self.assertEqual(self.vote(value).status_code, 400)
+        self.assertFalse(PostVote.objects.exists())
+
+    def test_csrf_is_enforced(self):
+        client = Client(enforce_csrf_checks=True)
+        self.assertEqual(self.vote("1", client=client).status_code, 403)
+
+    def test_first_vote_sets_cookie_and_returns_score(self):
+        response = self.vote("1")
+
+        self.assertEqual(response.json(), {"score": 1, "vote": 1})
+        self.assertIn(views.VOTER_COOKIE, response.cookies)
+        self.assertTrue(response.cookies[views.VOTER_COOKIE]["httponly"])
+
+    def test_repeating_same_vote_removes_it(self):
+        self.vote("1")
+        response = self.vote("1")
+
+        self.assertEqual(response.json(), {"score": 0, "vote": None})
+        self.assertFalse(PostVote.objects.exists())
+
+    def test_opposite_vote_flips_it(self):
+        self.vote("1")
+        response = self.vote("-1")
+
+        self.assertEqual(response.json(), {"score": -1, "vote": -1})
+        self.assertEqual(PostVote.objects.count(), 1)
+
+    def test_same_ip_with_new_cookie_changes_existing_vote(self):
+        self.vote("1", client=Client())
+        response = self.vote("-1", client=Client())
+
+        self.assertEqual(response.json()["score"], -1)
+        self.assertEqual(PostVote.objects.count(), 1)
+
+    def test_real_ip_header_takes_precedence(self):
+        Client().post(
+            self.url,
+            {"value": "1"},
+            REMOTE_ADDR="172.18.0.5",
+            HTTP_X_REAL_IP="1.1.1.1",
+        )
+        Client().post(
+            self.url,
+            {"value": "1"},
+            REMOTE_ADDR="172.18.0.5",
+            HTTP_X_REAL_IP="2.2.2.2",
+        )
+
+        self.assertEqual(PostVote.objects.count(), 2)
+
+    def test_same_cookie_from_new_ip_changes_existing_vote(self):
+        self.vote("1", ip="10.0.0.1")
+        self.vote("-1", ip="10.0.0.2")
+
+        self.assertEqual(PostVote.objects.count(), 1)
+        self.assertEqual(self.score(), -1)
+
+    def test_different_visitors_votes_add_up(self):
+        for index in range(3):
+            self.vote("1", client=Client(), ip=f"10.0.0.{index}")
+        self.vote("-1", client=Client(), ip="10.0.1.1")
+
+        self.assertEqual(self.score(), 2)
+
+    def test_non_json_vote_redirects_to_vote_block(self):
+        response = self.vote("1", json=False)
+
+        self.assertRedirects(
+            response,
+            reverse("post_detail", args=[self.post.slug]) + "#vote",
+            fetch_redirect_response=False,
+        )
+        self.assertEqual(self.score(), 1)
+
+    def test_post_detail_does_not_set_voter_cookie(self):
+        response = self.client.get(
+            reverse("post_detail", args=[self.post.slug])
+        )
+
+        self.assertNotIn(views.VOTER_COOKIE, response.cookies)
+
+    def test_post_detail_shows_score_and_active_vote(self):
+        self.vote("-1")
+        self.vote("-1", client=Client(), ip="10.0.0.2")
+
+        response = self.client.get(
+            reverse("post_detail", args=[self.post.slug])
+        )
+
+        self.assertContains(
+            response, 'class="score score--neg" data-score>\u22122<', count=2
+        )
+        self.assertContains(response, 'value="-1" class="vote-btn is-active"')
+        self.assertContains(response, 'value="1" class="vote-btn"')
+
+    def test_posts_list_shows_zero_score(self):
+        response = self.client.get("/")
+
+        self.assertContains(
+            response, 'class="score score--zero" data-score>+0<'
+        )
+
+    def test_tag_page_score_is_not_multiplied_by_tags(self):
+        first = Tag.objects.create(name="one")
+        second = Tag.objects.create(name="two")
+        self.post.tags.set([first, second])
+        for index in range(3):
+            self.vote("1", client=Client(), ip=f"10.0.0.{index}")
+
+        response = self.client.get(reverse("tagged_posts", args=[first.slug]))
+
+        self.assertContains(response, 'class="score score--pos" data-score>+3<')
+
+    def test_score_filters(self):
+        self.assertEqual(signed_score(0), "+0")
+        self.assertEqual(signed_score(5), "+5")
+        self.assertEqual(signed_score(-2), "\u22122")
+        self.assertEqual(score_class(0), "score--zero")
+        self.assertEqual(score_class(3), "score--pos")
+        self.assertEqual(score_class(-1), "score--neg")

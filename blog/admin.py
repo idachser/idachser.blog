@@ -3,7 +3,7 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, render
 from django.urls import path
 
-from .models import MediaFile, Post, Tag
+from .models import MediaFile, Post, Tag, with_score
 from .views import render_md
 
 
@@ -15,6 +15,14 @@ class MediaFileInline(admin.TabularInline):
 
 class PostAdmin(admin.ModelAdmin):
     inlines = [MediaFileInline]
+    list_display = ["title", "publish_date", "published", "score"]
+
+    def get_queryset(self, request):
+        return with_score(super().get_queryset(request))
+
+    @admin.display(ordering="score")
+    def score(self, obj):
+        return obj.score
 
     def get_urls(self):
         urls = [

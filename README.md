@@ -11,6 +11,7 @@ It has:
 - error alerting via admin emails
 - draft preview: the **Preview** button on a post's admin page renders it
   with the site template before it is published (staff only)
+- post voting: `+`/`−` under each post, score shown next to the title
 
 ## Stack
 
@@ -107,6 +108,22 @@ Create the password file on the server (`apache2-utils` / `httpd-tools`):
 ```bash
 htpasswd -B -c nginx/.htpasswd <username>
 ```
+
+## Post Voting
+
+Visitors can vote a post up or down without an account. Clicking the same
+button again removes the vote; clicking the other one flips it. The score is
+green above zero, red below and grey at zero.
+
+One vote per post is allowed per visitor, enforced two ways:
+
+- a signed, `HttpOnly` `voter_id` cookie (set only when voting)
+- an HMAC-SHA256 hash of the client IP keyed with `SECRET_KEY` (the raw IP is
+  never stored; the IP comes from nginx's `X-Real-IP`)
+
+Visitors behind a shared IP (NAT, office, mobile carrier) therefore share a
+single vote per post, and rotating `SECRET_KEY` resets both mechanisms. nginx
+limits `POST /post/<slug>/vote/` to 10 req/min per IP with a burst of 10.
 
 ## Tests & Linting
 
