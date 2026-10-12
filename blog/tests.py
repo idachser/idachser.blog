@@ -21,7 +21,11 @@ from PIL import Image
 from rss.feeds import PostsFeed
 
 from .models import MediaFile, Post, PostVote, Tag
-from .templatetags.blog_extras import score_class, signed_score
+from .templatetags.blog_extras import (
+    score_class,
+    signed_score,
+    plain_score,
+)
 from . import views
 
 
@@ -602,7 +606,10 @@ class PostVoteTests(TestCase):
         )
 
         self.assertContains(
-            response, 'class="score score--neg" data-score>\u22122<', count=2
+            response, 'class="score score--neg" data-score>\u22122<'
+        )
+        self.assertContains(
+            response, 'class="score score--neg" data-score="plain">\u22122<'
         )
         self.assertContains(response, 'value="-1" class="vote-btn is-active"')
         self.assertContains(response, 'value="1" class="vote-btn"')
@@ -629,6 +636,9 @@ class PostVoteTests(TestCase):
         self.assertEqual(signed_score(0), "+0")
         self.assertEqual(signed_score(5), "+5")
         self.assertEqual(signed_score(-2), "\u22122")
+        self.assertEqual(plain_score(-2), "\u22122")
+        self.assertEqual(plain_score(0), "0")
+        self.assertEqual(plain_score(3), "3")
         self.assertEqual(score_class(0), "score--zero")
         self.assertEqual(score_class(3), "score--pos")
         self.assertEqual(score_class(-1), "score--neg")

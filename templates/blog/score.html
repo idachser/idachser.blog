@@ -1,1 +1,1 @@
-{% load blog_extras %}<span class="score {{ score|score_class }}" data-score>{{ score|signed_score }}</span>
+{% load blog_extras %}<span class="score {{ score|score_class }}" data-score{% if plain %}="plain">{{ score|plain_score }}{% else %}>{{ score|signed_score }}{% endif %}</span>

@@ -243,14 +243,13 @@ blockquote {
     cursor: pointer;
     color: inherit;
     background: none;
-    border: 2px solid var(--secondary-text-light);
-    transition: color 0.2s, border-color 0.2s;
+    border: none;
+    transition: color 0.2s;
 }
 
 .vote-btn:hover,
 .vote-btn.is-active {
     color: var(--links-color);
-    border-color: var(--links-color);
 }
 
 .article-name {

@@ -40,7 +40,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await response.json();
 
         document.querySelectorAll("[data-score]").forEach((el) => {
-            el.textContent = formatScore(data.score);
+            el.textContent =
+                el.dataset.score === "plain" && data.score >= 0
+                    ? data.score
+                    : formatScore(data.score);
             el.classList.remove("score--pos", "score--neg", "score--zero");
             el.classList.add(scoreClass(data.score));
         });
