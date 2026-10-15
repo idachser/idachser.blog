@@ -15,7 +15,6 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
-    environment: production
     env:
       DJANGO_KEY: ci-secret-key
       DJANGO_DEBUG: "True"
@@ -34,7 +33,6 @@ jobs:
 
   build-and-push:
     runs-on: ubuntu-latest
-    environment: production
     needs: test
     permissions:
       contents: read
