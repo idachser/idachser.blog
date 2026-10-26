@@ -1,24 +1,24 @@
+---
 services:
   init-perms:
     image: alpine:3.20
     container_name: mywebsite-init-perms
-    user: "0:0"
+    user: 0:0
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/uploads
       - log_volume:/app/logs
-    restart: "no"
+    restart: 'no'
     command: >
       sh -lc "
         set -e;
         mkdir -p /app/staticfiles /app/uploads /app/logs;
         chown -R 1000:1000 /app/staticfiles /app/uploads /app/logs
       "
-
   web:
     image: ${WEB_IMAGE:-ghcr.io/idachser/idachser.blog:latest}
     container_name: mywebsite
-    user: "1000:1000"
+    user: 1000:1000
     env_file: .env
     environment:
       PGSERVICEFILE: /home/appuser/.pg_service.conf
@@ -55,27 +55,21 @@ services:
         uv run manage.py collectstatic --noinput &&
         uv run gunicorn website.wsgi:application --bind 0.0.0.0:8000
       "
-
   db:
     image: postgres:17
-    secrets:
-      - db_password
+    secrets: [db_password]
     env_file: .env
     environment:
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    volumes: [postgres_data:/var/lib/postgresql/data]
     restart: unless-stopped
-
   nginx:
     image: nginx
     restart: always
     environment:
       ADMIN_URL: ${ADMIN_URL:?ADMIN_URL must be set in .env}
-      NGINX_ENVSUBST_FILTER: "^ADMIN_URL$$"
-    ports:
-      - "80:80"
-      - "443:443"
+      NGINX_ENVSUBST_FILTER: ^ADMIN_URL$$
+    ports: [80:80, 443:443]
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/uploads
@@ -83,12 +77,9 @@ services:
       - ./nginx/.htpasswd:/etc/nginx/.htpasswd:ro
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt
-      - ./logs/nginx:/var/log/nginx/json
-    depends_on:
-      - web
-    networks:
-      - default
-
+      - /var/log/nginx-blog:/var/log/nginx/json
+    depends_on: [web]
+    networks: [default]
   certbot:
     image: certbot/certbot
     volumes:
@@ -100,17 +91,14 @@ services:
         certbot renew --webroot --webroot-path=/var/www/certbot;
       done"
     restart: unless-stopped
-
 volumes:
   postgres_data:
   static_volume:
   media_volume:
   log_volume:
-
 networks:
   default:
     name: idachserblog_default
-
 secrets:
   db_password:
     file: ./secrets/db_password
