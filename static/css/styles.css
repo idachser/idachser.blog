@@ -425,6 +425,7 @@ header {
 /* Footer */
 footer {
     flex-shrink: 0;
+    margin-top: 40px;
     text-align: center;
 }
 
