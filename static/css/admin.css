@@ -5,7 +5,7 @@
 html[data-theme="light"],
 :root {
     --primary: #545454;
-    --secondary: #161616;
+    --secondary: #2e2e2e;
     --accent: #CF0000;
     --primary-fg: #ffffff;
 
@@ -37,7 +37,7 @@ html[data-theme="light"],
 
     --button-bg: #161616;
     --button-hover-bg: #CF0000;
-    --default-button-bg: #CF0000;
+    --default-button-bg: #ff6f06;
     --default-button-hover-bg: #a00000;
     --close-button-bg: #545454;
     --close-button-hover-bg: #161616;
@@ -114,12 +114,15 @@ html[data-theme="dark"] {
 }
 
 body {
-    font-weight: 500;
+    font-weight: 400;
 }
 
 h1,
-#site-name,
 #user-tools,
 #logout-form button {
+    font-weight: 500;
+}
+
+#site-name {
     font-weight: 600;
 }
