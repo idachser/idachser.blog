@@ -22,9 +22,9 @@ html[data-theme="light"],
     --breadcrumbs-link-fg: #dedede;
     --breadcrumbs-bg: #252525;
 
-    --link-fg: #ff6f06;
-    --link-hover-color: #CF0000;
-    --link-selected-fg: #CF0000;
+    --link-fg: #CF0000;
+    --link-hover-color: #ff6f06;
+    --link-selected-fg: #ff6f06;
 
     --hairline-color: #cacaca;
     --border-color: #b0b0b0;
@@ -61,9 +61,9 @@ html[data-theme="light"],
         --breadcrumbs-link-fg: #dddddd;
         --breadcrumbs-bg: #252525;
 
-        --link-fg: #06ad28;
-        --link-hover-color: #ff6f06;
-        --link-selected-fg: #ff6f06;
+        --link-fg: #ff6f06;
+        --link-hover-color: #CF0000;
+        --link-selected-fg: #CF0000;
 
         --hairline-color: #2a2a2a;
         --border-color: #3a3a3a;
@@ -95,9 +95,9 @@ html[data-theme="dark"] {
     --breadcrumbs-link-fg: #dddddd;
     --breadcrumbs-bg: #252525;
 
-    --link-fg: #06ad28;
-    --link-hover-color: #ff6f06;
-    --link-selected-fg: #ff6f06;
+    --link-fg: #ff6f06;
+    --link-hover-color: #CF0000;
+    --link-selected-fg: #CF0000;
 
     --hairline-color: #2a2a2a;
     --border-color: #3a3a3a;
@@ -111,4 +111,15 @@ html[data-theme="dark"] {
     --button-bg: #333333;
     --close-button-bg: #333333;
     --close-button-hover-bg: #555555;
+}
+
+body {
+    font-weight: 500;
+}
+
+h1,
+#site-name,
+#user-tools,
+#logout-form button {
+    font-weight: 600;
 }

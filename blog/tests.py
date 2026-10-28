@@ -434,6 +434,11 @@ class PostPreviewAdminTests(TestCase):
         self.assertContains(response, "css/admin.css")
         self.assertContains(response, "admin/css/base.css")
 
+    def test_admin_header_uses_blog_name(self):
+        response = self.client.get(reverse("admin:login"))
+
+        self.assertContains(response, "idachser.blog administration")
+
     def test_preview_redirects_anonymous_user_to_login(self):
         response = self.client.get(self.preview_url)
 
