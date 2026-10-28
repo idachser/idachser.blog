@@ -1,0 +1,114 @@
+/* Overrides Django admin variables with the blog palette.
+   Selectors mirror admin/css/base.css and dark_mode.css so that the
+   explicit theme toggle keeps precedence over the system preference. */
+
+html[data-theme="light"],
+:root {
+    --primary: #545454;
+    --secondary: #161616;
+    --accent: #CF0000;
+    --primary-fg: #ffffff;
+
+    --body-fg: #161616;
+    --body-bg: #dedede;
+    --body-quiet-color: #545454;
+    --body-medium-color: #333333;
+    --body-loud-color: #000000;
+
+    --header-color: #dedede;
+    --header-link-color: #dedede;
+
+    --breadcrumbs-fg: #a0a0a0;
+    --breadcrumbs-link-fg: #dedede;
+    --breadcrumbs-bg: #252525;
+
+    --link-fg: #ff6f06;
+    --link-hover-color: #CF0000;
+    --link-selected-fg: #CF0000;
+
+    --hairline-color: #cacaca;
+    --border-color: #b0b0b0;
+
+    --error-fg: #CF0000;
+
+    --darkened-bg: #d2d2d2;
+    --selected-bg: #c8c8c8;
+    --selected-row: #f3d9c6;
+
+    --button-bg: #161616;
+    --button-hover-bg: #CF0000;
+    --default-button-bg: #CF0000;
+    --default-button-hover-bg: #a00000;
+    --close-button-bg: #545454;
+    --close-button-hover-bg: #161616;
+    --delete-button-bg: #CF0000;
+    --delete-button-hover-bg: #a00000;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary: #2e2e2e;
+        --secondary: #0d0d0d;
+        --primary-fg: #dddddd;
+
+        --body-fg: #dddddd;
+        --body-bg: #161616;
+        --body-quiet-color: #a0a0a0;
+        --body-medium-color: #c8c8c8;
+        --body-loud-color: #ffffff;
+
+        --breadcrumbs-fg: #8a8a8a;
+        --breadcrumbs-link-fg: #dddddd;
+        --breadcrumbs-bg: #252525;
+
+        --link-fg: #06ad28;
+        --link-hover-color: #ff6f06;
+        --link-selected-fg: #ff6f06;
+
+        --hairline-color: #2a2a2a;
+        --border-color: #3a3a3a;
+
+        --error-fg: #ff4d4d;
+
+        --darkened-bg: #252525;
+        --selected-bg: #1e1e1e;
+        --selected-row: #1f3324;
+
+        --button-bg: #333333;
+        --close-button-bg: #333333;
+        --close-button-hover-bg: #555555;
+    }
+}
+
+html[data-theme="dark"] {
+    --primary: #2e2e2e;
+    --secondary: #0d0d0d;
+    --primary-fg: #dddddd;
+
+    --body-fg: #dddddd;
+    --body-bg: #161616;
+    --body-quiet-color: #a0a0a0;
+    --body-medium-color: #c8c8c8;
+    --body-loud-color: #ffffff;
+
+    --breadcrumbs-fg: #8a8a8a;
+    --breadcrumbs-link-fg: #dddddd;
+    --breadcrumbs-bg: #252525;
+
+    --link-fg: #06ad28;
+    --link-hover-color: #ff6f06;
+    --link-selected-fg: #ff6f06;
+
+    --hairline-color: #2a2a2a;
+    --border-color: #3a3a3a;
+
+    --error-fg: #ff4d4d;
+
+    --darkened-bg: #252525;
+    --selected-bg: #1e1e1e;
+    --selected-row: #1f3324;
+
+    --button-bg: #333333;
+    --close-button-bg: #333333;
+    --close-button-hover-bg: #555555;
+}

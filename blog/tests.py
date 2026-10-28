@@ -428,6 +428,12 @@ class PostPreviewAdminTests(TestCase):
         self.assertNotContains(response, 'id="vote"')
         self.assertNotContains(response, "data-score")
 
+    def test_admin_pages_load_site_palette_stylesheet(self):
+        response = self.client.get(reverse("admin:login"))
+
+        self.assertContains(response, "css/admin.css")
+        self.assertContains(response, "admin/css/base.css")
+
     def test_preview_redirects_anonymous_user_to_login(self):
         response = self.client.get(self.preview_url)
 
